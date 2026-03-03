@@ -1,83 +1,233 @@
-<div align="center">
-  <img src="https://raw.githubusercontent.com/NavarMP/NavarMP/main/public/assets/Logo.svg" width="120" alt="Logo" />
-  <br/>
-  <img src="https://readme-typing-svg.herokuapp.com?font=Fira+Code&weight=600&size=30&pause=1000&color=F75C7E&center=true&vCenter=true&width=500&lines=Hi,+I'm+Muḥammed+Navār;Full+Stack+Developer;Graphic+Designer;Creative+Technologist" alt="Typing SVG" />
-</div>
+# Muḥammed Navār Portfolio
 
-<div align="center">
-  <img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&height=200&section=header&text=Building%20Digital%20Experiences&fontSize=40&fontColor=ffffff&desc=Design%20%7C%20Code%20%7C%20Innovate&descAlignY=65&descAlign=50" width="100%" />
-</div>
+A modern, full-stack portfolio website built with Next.js 15, featuring dynamic theming, MongoDB database integration, and a secure admin CMS.
 
-<div align="center">
-  
-  [![Website](https://img.shields.io/badge/Website-navarmp.com-blue?style=for-the-badge&logo=google-chrome&logoColor=white)](https://navarmp.com)
-  [![LinkedIn](https://img.shields.io/badge/LinkedIn-Connect-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](https://linkedin.com/in/NavarMP)
-  [![Behance](https://img.shields.io/badge/Behance-Portfolio-1769ff?style=for-the-badge&logo=behance&logoColor=white)](https://behance.net/NavarMP)
-  
-</div>
+## ✨ Features
 
----
+- 🎨 **Dynamic Theming**: 14 color schemes with light, dark, and system modes
+- 📱 **Fully Responsive**: Optimized for all devices and screen sizes
+- 🔐 **Secure Admin Panel**: NextAuth.js v5 with role-based access control
+- 💾 **MongoDB Integration**: Persistent data storage for projects, testimonials, and inquiries
+- 🚀 **Modern Stack**: Next.js 15, React 18, TypeScript, Tailwind CSS
+- 🎭 **Smooth Animations**: GSAP-powered interactions and transitions
+- 📊 **CMS Features**: Manage projects, inquiries, availability status, and more
+- 🌐 **SEO Optimized**: Proper meta tags, semantic HTML, and performance optimizations
 
-### 🚀 About Me
+## 🛠️ Tech Stack
 
-<div align="center">
-  <img src="https://raw.githubusercontent.com/NavarMP/NavarMP/main/public/assets/Portrait.png" width="150" style="border-radius: 50%; border: 4px solid #F75C7E;" alt="Portrait" />
-</div>
-<br/>
+### Frontend
+- **Framework**: Next.js 15 (App Router)
+- **Language**: TypeScript
+- **Styling**: Tailwind CSS
+- **Icons**: Lucide React
+- **Animations**: GSAP (GreenSock Animation Platform)
 
-I'm a multidisciplinary creator sitting at the intersection of **Design** and **Technology**. With a background in Graphic Design and a passion for Full-Stack Development, I build applications that not only work perfectly but look stunning.
+### Backend
+- **Database**: MongoDB with Mongoose ODM
+- **Authentication**: NextAuth.js v5
+- **Password Hashing**: bcryptjs
+- **API**: Next.js API Routes
 
-- 🔭 I’m currently working on **NavarMP Portfolio V2**
-- 🌱 I’m currently learning **Next.js 14, Framer Motion, and Three.js**
-- 💬 Ask me about **UI/UX Design, React, and Branding**
-- 📫 How to reach me: **navarmp@gmail.com**
+### Deployment
+- **Platform**: Vercel (recommended) or any Node.js hosting
+- **Database**: MongoDB Atlas
 
----
+## 📦 Installation
 
-### 🐍 My Contributions
+### Prerequisites
+- Node.js 18+ 
+- MongoDB instance (local or Atlas)
+- npm or yarn package manager
 
-<div align="center">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/NavarMP/NavarMP/output/github-contribution-grid-snake-dark.svg">
-    <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/NavarMP/NavarMP/output/github-contribution-grid-snake.svg">
-    <img alt="github contribution grid snake animation" src="https://raw.githubusercontent.com/NavarMP/NavarMP/output/github-contribution-grid-snake.svg">
-  </picture>
-</div>
+### Setup
 
----
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/navarmp/portfolio.git
+   cd portfolio
+   ```
 
-### 💻 Tech Stack
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
 
-<div align="center">
+3. **Configure environment variables**
+   
+   Create a `.env.local` file in the root directory:
+   ```env
+   MONGODB_URI=your_mongodb_connection_string
+   NEXTAUTH_SECRET=your_nextauth_secret
+   NEXTAUTH_URL=http://localhost:3000
+   AUTH_TRUST_HOST=true
+   ```
 
-| Frontend | Backend | Design | Tools |
-| :---: | :---: | :---: | :---: |
-| ![React](https://img.shields.io/badge/React-20232A?style=flat&logo=react&logoColor=61DAFB) | ![Node.js](https://img.shields.io/badge/Node.js-43853D?style=flat&logo=node.js&logoColor=white) | ![Figma](https://img.shields.io/badge/Figma-F24E1E?style=flat&logo=figma&logoColor=white) | ![Git](https://img.shields.io/badge/Git-F05032?style=flat&logo=git&logoColor=white) |
-| ![Next.js](https://img.shields.io/badge/Next.js-000000?style=flat&logo=next.js&logoColor=white) | ![MongoDB](https://img.shields.io/badge/MongoDB-4EA94B?style=flat&logo=mongodb&logoColor=white) | ![Photoshop](https://img.shields.io/badge/Adobe%20Photoshop-31A8FF?style=flat&logo=adobe%20photoshop&logoColor=white) | ![VS Code](https://img.shields.io/badge/VS%20Code-0078D4?style=flat&logo=visual%20studio%20code&logoColor=white) |
-| ![TailwindCSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=flat&logo=tailwind-css&logoColor=white) | ![Express.js](https://img.shields.io/badge/Express.js-404D59?style=flat&logo=express&logoColor=white) | ![Illustrator](https://img.shields.io/badge/Adobe%20Illustrator-FF9A00?style=flat&logo=adobe%20illustrator&logoColor=white) | ![Postman](https://img.shields.io/badge/Postman-FF6C37?style=flat&logo=postman&logoColor=white) |
-| ![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=flat&logo=typescript&logoColor=white) | ![Firebase](https://img.shields.io/badge/Firebase-039BE5?style=flat&logo=Firebase&logoColor=white) | ![After Effects](https://img.shields.io/badge/Adobe%20After%20Effects-9999FF?style=flat&logo=adobe%20after%20effects&logoColor=white) | ![Vercel](https://img.shields.io/badge/Vercel-000000?style=flat&logo=vercel&logoColor=white) |
+   Generate a secret for NextAuth:
+   ```bash
+   npx auth secret
+   ```
 
-</div>
+4. **Seed the database** (optional but recommended)
+   ```bash
+   npm run seed
+   ```
+   
+   This creates:
+   - Admin user: `NavarMP@gmail.com` / `admin123`
+   - Sample projects
+   - Sample testimonials
+   - Sample blog posts
 
----
+5. **Run the development server**
+   ```bash
+   npm run dev
+   ```
 
-### 📊 GitHub Stats
+6. **Open your browser**
+   
+   Navigate to [http://localhost:3000](http://localhost:3000)
 
-<div align="center">
-  <img src="https://github-readme-stats.vercel.app/api?username=NavarMP&show_icons=true&theme=tokyonight&hide_border=true" height="150" alt="stats graph"  />
-  <img src="https://github-readme-stats.vercel.app/api/top-langs/?username=NavarMP&layout=compact&theme=tokyonight&hide_border=true" height="150" alt="languages graph"  />
-</div>
+## 🔑 Admin Access
 
-<div align="center">
-  <img src="https://github-readme-streak-stats.herokuapp.com/?user=NavarMP&theme=tokyonight&hide_border=true" alt="streak graph" />
-</div>
+After running the seed script, an admin account will be created:
 
----
+- **URL**: `/admin/login`
+- **Email**: Check the seed script output for credentials
+- **Password**: Check the seed script output for credentials
 
-<div align="center">
-  <img src="https://komarev.com/ghpvc/?username=NavarMP&color=blueviolet&style=for-the-badge&label=PROFILE+VIEWS" alt="Profile Views"/>
-  
-  <br/>
-  
-  <sub><i>"Design is wisdom made visible."</i></sub>
-</div>
+> [!CAUTION]
+> **CRITICAL SECURITY STEPS:**
+> 1. The seed script creates a DEFAULT admin account for development/testing only
+> 2. **BEFORE DEPLOYING TO PRODUCTION**: 
+>    - Change the admin password immediately via the admin panel or database
+>    - Update the email to your real email address
+>    - Consider adding 2FA or IP restrictions
+> 3. **NEVER** commit `.env.local` or `.env` files to version control
+> 4. **NEVER** use default credentials in production environments
+> 5. Use strong, unique passwords generated by a password manager
+
+## 🔒 Security Best Practices
+
+This application implements several security measures:
+
+- **Password Hashing**: bcryptjs with 12 rounds (secure default)
+- **HTTP-Only Cookies**: NextAuth sessions use secure, HTTP-only cookies
+- **Role-Based Access**: Middleware protects all `/admin/*` routes
+- **CSRF Protection**: Built into NextAuth.js
+- **Environment Variables**: Sensitive data stored in `.env.local` (never committed)
+
+**Before Production Deployment:**
+1. ✅ Update all default credentials
+2. ✅ Enable HTTPS (required for secure cookies)
+3. ✅ Set `NEXTAUTH_URL` to your production domain
+4. ✅ Use MongoDB Atlas with IP whitelist and strong credentials
+5. ✅ Review and update `AUTH_TRUST_HOST` (only needed for localhost testing)
+6. ✅ Consider implementing rate limiting on login endpoints
+7. ✅ Regularly update dependencies for security patches
+
+## 📁 Project Structure
+
+```
+├── app/                      # Next.js App Router pages
+│   ├── admin/               # Protected admin pages
+│   ├── api/                 # API routes
+│   ├── work/                # Portfolio/projects pages
+│   ├── about/               # About page
+│   ├── contact/             # Contact form page
+│   └── resume/              # Resume page
+├── components/              # Reusable React components
+│   ├── admin/              # Admin-specific components
+│   ├── layout/             # Layout components (Header, Footer)
+│   └── providers/          # Context providers (Theme, Availability)
+├── lib/                     # Utility functions
+│   └── mongodb.ts          # MongoDB connection handler
+├── models/                  # Mongoose schemas
+├── scripts/                 # Utility scripts (seed.ts)
+├── styles/                  # Global styles
+└── public/                  # Static assets
+```
+
+## 🎨 Customization
+
+### Themes
+Themes are defined in `app/globals.css`. Each theme has:
+- Primary, secondary, and tertiary colors
+- Surface and background colors
+- Text colors (on-surface, on-surface-variant)
+
+To add a new theme:
+1. Define colors in `globals.css`
+2. Add theme name to `ThemeToggle` component
+
+### Content Management
+
+#### Projects
+- Navigate to `/admin/projects`
+- Create, edit, or delete projects
+- Set featured status and order
+
+#### Inquiries
+- View all contact form submissions at `/admin/inbox`
+- Update status (new, read, responded, archived)
+
+#### Availability Status
+- Toggle "Available for Freelance" and "Open for Hire" at `/admin/settings`
+- Update status message displayed in header
+
+## 🚀 Deployment
+
+### Vercel (Recommended)
+
+1. Push your code to GitHub
+2. Import project in Vercel
+3. Add environment variables:
+   - `MONGODB_URI`
+   - `NEXTAUTH_SECRET`
+   - `NEXTAUTH_URL` (your production URL)
+4. Deploy
+
+### Other Platforms
+
+Build the production bundle:
+```bash
+npm run build
+npm start
+```
+
+Ensure your hosting platform:
+- Supports Node.js 18+
+- Can access your MongoDB instance
+- Has environment variables configured
+
+## 📝 Scripts
+
+- `npm run dev` - Start development server
+- `npm run build` - Build for production
+- `npm start` - Start production server
+- `npm run seed` - Populate database with sample data
+- `npm run lint` - Run ESLint
+
+## 🔒 Security
+
+- Passwords are hashed using bcryptjs (12 rounds)
+- Admin routes protected by middleware
+- Role-based access control (admin only)
+- Secure HTTP-only session cookies
+- CSRF protection via NextAuth.js
+
+## 📄 License
+
+This project is open source and available under the [MIT License](LICENSE).
+
+## 👤 Author
+
+**Muḥammed Navār**
+- Email: NavarMP@gmail.com
+- Website: [navarmp.com](https://navarmp.com)
+
+## 🙏 Acknowledgments
+
+- Next.js team for the amazing framework
+- Vercel for hosting and deployment
+- MongoDB for the database
+- GSAP for smooth animations
