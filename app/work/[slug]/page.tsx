@@ -21,9 +21,24 @@ export async function generateMetadata({ params }: PageProps) {
         };
     }
 
+    const title = `${(project as any).title} - Muḥammed Navār`;
+    const description = (project as any).description;
+
     return {
-        title: `${(project as any).title} - Muḥammed Navār`,
-        description: (project as any).description,
+        title,
+        description,
+        openGraph: {
+            title,
+            description,
+            images: [
+                {
+                    url: `/api/og?title=${encodeURIComponent((project as any).title)}&description=${encodeURIComponent(description)}`,
+                    width: 1200,
+                    height: 630,
+                    alt: title,
+                },
+            ],
+        },
     };
 }
 

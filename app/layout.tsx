@@ -11,7 +11,11 @@ import { SettingsButton } from "@/components/ui/SettingsButton";
 import { SmoothScrollProvider } from "@/components/providers/SmoothScrollProvider";
 
 export const metadata: Metadata = {
-    title: "Muḥammed Navār - Graphic Designer & Full-Stack Developer",
+    metadataBase: new URL("https://NavarMP.com"),
+    title: {
+        default: "Muḥammed Navār - Graphic Designer & Full-Stack Developer",
+        template: "%s | NavarMP",
+    },
     description: "Portfolio showcasing graphic design, web development, and digital marketing work by Muḥammed Navār",
     keywords: ["graphic design", "web development", "digital marketing", "portfolio", "branding"],
     authors: [{ name: "Muḥammed Navār", url: "https://NavarMP.com" }],
@@ -19,6 +23,20 @@ export const metadata: Metadata = {
         title: "Muḥammed Navār - Graphic Designer & Full-Stack Developer",
         description: "Portfolio showcasing graphic design, web development, and digital marketing work",
         type: "website",
+        images: [
+            {
+                url: "/api/og",
+                width: 1200,
+                height: 630,
+                alt: "Muḥammed Navār Portfolio",
+            },
+        ],
+    },
+    twitter: {
+        card: "summary_large_image",
+        title: "Muḥammed Navār - Graphic Designer & Full-Stack Developer",
+        description: "Portfolio showcasing graphic design, web development, and digital marketing work",
+        images: ["/api/og"],
     },
 };
 
@@ -30,7 +48,6 @@ export default function RootLayout({
     return (
         <html lang="en" suppressHydrationWarning>
             <head>
-                <link rel="icon" href="/favicon.ico" />
             </head>
             <body className="antialiased">
                 <ThemeProvider>
