@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Save, Loader2, X, Plus } from "lucide-react";
+import { Save, Loader2, X, Plus, Image as ImageIcon, Video, Link as LinkIcon, Info } from "lucide-react";
 
 interface ProjectFormData {
     title: string;
@@ -167,145 +167,211 @@ export default function ProjectForm({ initialData }: { initialData?: any }) {
     const isWebOrApp = ["web-development", "app-development"].includes(formData.category);
 
     return (
-        <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="grid md:grid-cols-2 gap-6">
-                <div>
-                    <label className="block text-sm font-medium mb-2 text-on-surface">Project Title *</label>
-                    <input
-                        type="text"
-                        name="title"
-                        value={formData.title}
-                        onChange={handleChange}
-                        required
-                        className="w-full px-4 py-3 rounded-xl bg-surface-variant/30 border border-outline/20 focus:border-primary outline-none"
-                    />
+        <form onSubmit={handleSubmit} className="space-y-8">
+            {/* Basic Information */}
+            <div className="bg-surface-variant/5 p-6 md:p-8 rounded-3xl border border-outline/10 space-y-6">
+                <div className="border-b border-outline/10 pb-4 mb-6 flex items-center gap-3">
+                    <div className="p-2 bg-primary/10 rounded-lg text-primary">
+                        <Info size={20} />
+                    </div>
+                    <div>
+                        <h3 className="text-xl font-bold font-display text-on-surface">Basic Information</h3>
+                        <p className="text-sm text-on-surface-variant mt-1">Core details about the project.</p>
+                    </div>
                 </div>
-                <div>
-                    <label className="block text-sm font-medium mb-2 text-on-surface">Slug *</label>
-                    <input
-                        type="text"
-                        name="slug"
-                        value={formData.slug}
-                        onChange={handleChange}
-                        required
-                        className="w-full px-4 py-3 rounded-xl bg-surface-variant/30 border border-outline/20 focus:border-primary outline-none"
-                    />
-                </div>
-            </div>
 
-            <div>
-                <label className="block text-sm font-medium mb-2 text-on-surface">Description *</label>
-                <textarea
-                    name="description"
-                    value={formData.description}
-                    onChange={handleChange}
-                    required
-                    rows={4}
-                    className="w-full px-4 py-3 rounded-xl bg-surface-variant/30 border border-outline/20 focus:border-primary outline-none resize-none"
-                />
-            </div>
-
-            <div className="grid md:grid-cols-2 gap-6">
-                <div>
-                    <label className="block text-sm font-medium mb-2 text-on-surface">Category *</label>
-                    <select
-                        name="category"
-                        value={formData.category}
-                        onChange={handleCategoryChange}
-                        className="w-full px-4 py-3 rounded-xl bg-surface-variant/30 border border-outline/20 focus:border-primary outline-none"
-                    >
-                        {Object.entries(CATEGORIES).map(([key, { label }]) => (
-                            <option key={key} value={key}>{label}</option>
-                        ))}
-                    </select>
-                </div>
-                <div>
-                    <label className="block text-sm font-medium mb-2 text-on-surface">Subcategory</label>
-                    <select
-                        name="subcategory"
-                        value={formData.subcategory}
-                        onChange={handleChange}
-                        className="w-full px-4 py-3 rounded-xl bg-surface-variant/30 border border-outline/20 focus:border-primary outline-none"
-                    >
-                        <option value="">Select Subcategory</option>
-                        {CATEGORIES[formData.category as keyof typeof CATEGORIES]?.subcategories.map((sub) => (
-                            <option key={sub.value} value={sub.value}>{sub.label}</option>
-                        ))}
-                    </select>
-                </div>
-            </div>
-
-            <div className="grid md:grid-cols-2 gap-6">
-                <div>
-                    <label className="block text-sm font-medium mb-2 text-on-surface">Client</label>
-                    <input
-                        type="text"
-                        name="client"
-                        value={formData.client}
-                        onChange={handleChange}
-                        className="w-full px-4 py-3 rounded-xl bg-surface-variant/30 border border-outline/20 focus:border-primary outline-none"
-                    />
-                </div>
-                <div>
-                    <label className="block text-sm font-medium mb-2 text-on-surface">Cover Image URL *</label>
-                    <div className="relative">
+                <div className="grid md:grid-cols-2 gap-6">
+                    <div>
+                        <label className="block text-sm font-medium mb-2 text-on-surface">Project Title *</label>
                         <input
                             type="text"
-                            name="coverImage"
-                            value={formData.coverImage}
+                            name="title"
+                            value={formData.title}
                             onChange={handleChange}
                             required
-                            placeholder="https://..."
-                            className="w-full px-4 py-3 rounded-xl bg-surface-variant/30 border border-outline/20 focus:border-primary outline-none pr-28"
+                            className="w-full px-4 py-3 rounded-xl bg-surface-variant/30 border border-outline/20 focus:border-primary outline-none transition-colors"
                         />
-                        <div className="absolute right-2 top-1/2 -translate-y-1/2 overflow-hidden">
-                            <input
-                                type="file"
-                                accept="image/*"
-                                onChange={handleImageUpload}
-                                className="absolute inset-0 opacity-0 cursor-pointer"
-                            />
-                            <div className="px-3 py-1.5 bg-surface text-xs font-medium rounded-lg border border-outline/20 hover:bg-surface-variant/50 transition-colors flex items-center gap-1 cursor-pointer">
-                                <span>Upload</span>
-                            </div>
-                        </div>
                     </div>
-                    {formData.coverImage && (
-                        <div className="mt-2 w-20 h-20 rounded-lg overflow-hidden border border-outline/20 relative group">
-                            <img src={formData.coverImage} alt="Preview" className="w-full h-full object-cover" />
-                        </div>
-                    )}
+                    <div>
+                        <label className="block text-sm font-medium mb-2 text-on-surface">Slug *</label>
+                        <input
+                            type="text"
+                            name="slug"
+                            value={formData.slug}
+                            onChange={handleChange}
+                            required
+                            className="w-full px-4 py-3 rounded-xl bg-surface-variant/30 border border-outline/20 focus:border-primary outline-none transition-colors"
+                        />
+                    </div>
+                </div>
+
+                <div>
+                    <label className="block text-sm font-medium mb-2 text-on-surface">Description *</label>
+                    <textarea
+                        name="description"
+                        value={formData.description}
+                        onChange={handleChange}
+                        required
+                        rows={4}
+                        className="w-full px-4 py-3 rounded-xl bg-surface-variant/30 border border-outline/20 focus:border-primary outline-none resize-none transition-colors"
+                    />
+                </div>
+
+                <div className="grid md:grid-cols-2 gap-6">
+                    <div>
+                        <label className="block text-sm font-medium mb-2 text-on-surface">Category *</label>
+                        <select
+                            name="category"
+                            value={formData.category}
+                            onChange={handleCategoryChange}
+                            className="w-full px-4 py-3 rounded-xl bg-surface-variant/30 border border-outline/20 focus:border-primary outline-none transition-colors"
+                        >
+                            {Object.entries(CATEGORIES).map(([key, { label }]) => (
+                                <option key={key} value={key}>{label}</option>
+                            ))}
+                        </select>
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium mb-2 text-on-surface">Subcategory</label>
+                        <select
+                            name="subcategory"
+                            value={formData.subcategory}
+                            onChange={handleChange}
+                            className="w-full px-4 py-3 rounded-xl bg-surface-variant/30 border border-outline/20 focus:border-primary outline-none transition-colors"
+                        >
+                            <option value="">Select Subcategory</option>
+                            {CATEGORIES[formData.category as keyof typeof CATEGORIES]?.subcategories.map((sub) => (
+                                <option key={sub.value} value={sub.value}>{sub.label}</option>
+                            ))}
+                        </select>
+                    </div>
+                </div>
+
+                <div className="grid md:grid-cols-2 gap-6">
+                    <div>
+                        <label className="block text-sm font-medium mb-2 text-on-surface">Client</label>
+                        <input
+                            type="text"
+                            name="client"
+                            value={formData.client}
+                            onChange={handleChange}
+                            className="w-full px-4 py-3 rounded-xl bg-surface-variant/30 border border-outline/20 focus:border-primary outline-none transition-colors"
+                        />
+                    </div>
+                    <div className="flex items-center gap-4 mt-6 md:mt-8">
+                        <label className="flex items-center gap-3 cursor-pointer p-3 md:p-4 rounded-xl border border-outline/20 bg-surface-variant/10 hover:bg-surface-variant/30 transition-colors flex-1">
+                            <input
+                                type="checkbox"
+                                name="isFreelance"
+                                checked={formData.isFreelance}
+                                onChange={handleChange}
+                                className="w-5 h-5 rounded text-primary focus:ring-primary"
+                            />
+                            <span className="font-medium text-sm">Freelance</span>
+                        </label>
+                        <label className="flex items-center gap-3 cursor-pointer p-3 md:p-4 rounded-xl border border-outline/20 bg-surface-variant/10 hover:bg-surface-variant/30 transition-colors flex-1">
+                            <input
+                                type="checkbox"
+                                name="featured"
+                                checked={formData.featured}
+                                onChange={handleChange}
+                                className="w-5 h-5 rounded text-primary focus:ring-primary"
+                            />
+                            <span className="font-medium text-sm">Featured</span>
+                        </label>
+                    </div>
                 </div>
             </div>
 
-            {/* Media Gallery Section */}
-            <div>
-                <label className="block text-sm font-medium mb-2 text-on-surface">Project Media</label>
-                <div className="space-y-4">
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        {formData.media.map((item: any, index: number) => (
-                            <div key={index} className="relative aspect-video bg-surface-variant/20 rounded-lg overflow-hidden group border border-outline/10">
+            {/* Media Section */}
+            <div className="bg-surface-variant/5 p-6 md:p-8 rounded-3xl border border-outline/10 space-y-8">
+                <div className="border-b border-outline/10 pb-4 flex items-center gap-3">
+                    <div className="p-2 bg-primary/10 rounded-lg text-primary">
+                        <ImageIcon size={20} />
+                    </div>
+                    <div>
+                        <h3 className="text-xl font-bold font-display text-on-surface">Project Media</h3>
+                        <p className="text-sm text-on-surface-variant mt-1">Cover image and display gallery content.</p>
+                    </div>
+                </div>
+
+                <div>
+                    <label className="block text-sm font-medium mb-3 text-on-surface">Cover Image *</label>
+                    <div className="flex flex-col md:flex-row gap-6">
+                        <div className="flex-1 relative order-2 md:order-1">
+                            <div className="relative">
+                                <input
+                                    type="text"
+                                    name="coverImage"
+                                    value={formData.coverImage}
+                                    onChange={handleChange}
+                                    required
+                                    placeholder="Paste URL or upload file"
+                                    className="w-full px-4 py-3 rounded-xl bg-surface-variant/30 border border-outline/20 focus:border-primary outline-none pr-32 transition-colors"
+                                />
+                                <div className="absolute right-2 top-1/2 -translate-y-1/2 overflow-hidden">
+                                    <input
+                                        type="file"
+                                        accept="image/*"
+                                        onChange={handleImageUpload}
+                                        className="absolute inset-0 opacity-0 cursor-pointer"
+                                    />
+                                    <div className="px-4 py-1.5 bg-primary text-on-primary text-xs font-bold rounded-lg hover:bg-primary/90 transition-colors flex items-center gap-1 cursor-pointer">
+                                        <span>Upload</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="order-1 md:order-2">
+                            {formData.coverImage ? (
+                                <div className="aspect-video w-full md:w-64 rounded-xl overflow-hidden border border-outline/20 relative shadow-md group">
+                                    <img src={formData.coverImage} alt="Cover Preview" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                                </div>
+                            ) : (
+                                <div className="aspect-video w-full md:w-64 rounded-xl border border-dashed border-outline/20 bg-surface-variant/10 flex flex-col items-center justify-center text-on-surface-variant">
+                                    <ImageIcon size={24} className="mb-2 opacity-50" />
+                                    <span className="text-xs">No cover image</span>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+
+                <div className="pt-6 border-t border-outline/10">
+                    <label className="block text-sm font-medium mb-3 text-on-surface">Project Gallery</label>
+                    <p className="text-sm text-on-surface-variant mb-4">Add images and videos to showcase the project on its details page.</p>
+                    
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {formData.media.map((item: { type: string, url: string }, index: number) => (
+                            <div key={index} className="relative aspect-video bg-surface-variant/20 rounded-2xl overflow-hidden group border border-outline/10 shadow-sm">
                                 {item.type === 'video' ? (
-                                    <video src={item.url} className="w-full h-full object-cover" />
+                                    <div className="relative w-full h-full">
+                                        <video src={item.url} className="w-full h-full object-cover" />
+                                        <div className="absolute top-2 left-2 p-1.5 bg-black/50 backdrop-blur-md text-white rounded-lg">
+                                            <Video size={14} />
+                                        </div>
+                                    </div>
                                 ) : (
-                                    <img src={item.url} alt={`Media ${index}`} className="w-full h-full object-cover" />
+                                    <img src={item.url} alt={`Media ${index}`} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                                 )}
-                                <button
-                                    type="button"
-                                    onClick={() => {
-                                        setFormData(prev => ({
-                                            ...prev,
-                                            media: prev.media.filter((_: any, i: number) => i !== index)
-                                        }));
-                                    }}
-                                    className="absolute top-2 right-2 p-1.5 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-                                >
-                                    <X size={14} />
-                                </button>
+                                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            setFormData(prev => ({
+                                                ...prev,
+                                                media: prev.media.filter((_, i) => i !== index)
+                                            }));
+                                        }}
+                                        className="p-3 bg-red-500 hover:bg-red-600 text-white rounded-full transition-colors transform hover:scale-110 shadow-lg"
+                                    >
+                                        <X size={18} />
+                                    </button>
+                                </div>
                             </div>
                         ))}
 
-                        <div className="relative aspect-video bg-surface-variant/10 rounded-lg border-2 border-dashed border-outline/20 hover:border-primary/50 transition-colors flex flex-col items-center justify-center text-on-surface-variant cursor-pointer">
+                        <div className="relative aspect-video bg-surface-variant/5 rounded-2xl border-2 border-dashed border-outline/20 hover:border-primary/50 hover:bg-surface-variant/10 transition-all flex flex-col items-center justify-center text-on-surface-variant cursor-pointer group">
                             <input
                                 type="file"
                                 multiple
@@ -313,7 +379,6 @@ export default function ProjectForm({ initialData }: { initialData?: any }) {
                                     const files = e.target.files;
                                     if (!files?.length) return;
 
-                                    // Show loading state on container
                                     const container = e.target.parentElement;
                                     if (container) container.style.opacity = "0.5";
 
@@ -345,120 +410,110 @@ export default function ProjectForm({ initialData }: { initialData?: any }) {
                                 }}
                                 className="absolute inset-0 opacity-0 cursor-pointer"
                             />
-                            <Plus size={24} className="mb-2" />
-                            <span className="text-xs font-medium">Add Media</span>
+                            <div className="w-12 h-12 rounded-full bg-surface shadow-sm flex items-center justify-center mb-3 group-hover:scale-110 group-hover:text-primary transition-all duration-300">
+                                <Plus size={24} />
+                            </div>
+                            <span className="text-sm font-medium">Add Media Files</span>
+                            <span className="text-xs mt-1 opacity-70">Images or Videos</span>
                         </div>
                     </div>
                 </div>
             </div>
 
-            {isWebOrApp && (
-                <>
+            {/* Tech Stack & Links */}
+            <div className="bg-surface-variant/5 p-6 md:p-8 rounded-3xl border border-outline/10 space-y-6">
+                <div className="border-b border-outline/10 pb-4 flex items-center gap-3 mb-6">
+                    <div className="p-2 bg-primary/10 rounded-lg text-primary">
+                        <LinkIcon size={20} />
+                    </div>
+                    <div>
+                        <h3 className="text-xl font-bold font-display text-on-surface">Tech Stack & Links</h3>
+                        <p className="text-sm text-on-surface-variant mt-1">Tools used and external URLs.</p>
+                    </div>
+                </div>
+
+                {isWebOrApp ? (
+                    <>
+                        <div className="grid md:grid-cols-2 gap-6">
+                            <div>
+                                <label className="block text-sm font-medium mb-2 text-on-surface">Tech Stack (comma separated)</label>
+                                <input
+                                    type="text"
+                                    name="techStack"
+                                    value={formData.techStack}
+                                    onChange={handleChange}
+                                    placeholder="React, Next.js, Tailwind"
+                                    className="w-full px-4 py-3 rounded-xl bg-surface-variant/30 border border-outline/20 focus:border-primary outline-none transition-colors"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium mb-2 text-on-surface">Tools (comma separated)</label>
+                                <input
+                                    type="text"
+                                    name="tools"
+                                    value={formData.tools}
+                                    onChange={handleChange}
+                                    placeholder="VS Code, Postman"
+                                    className="w-full px-4 py-3 rounded-xl bg-surface-variant/30 border border-outline/20 focus:border-primary outline-none transition-colors"
+                                />
+                            </div>
+                        </div>
+
+                        <div className="grid md:grid-cols-2 gap-6">
+                            <div>
+                                <label className="block text-sm font-medium mb-2 text-on-surface">Live URL</label>
+                                <input
+                                    type="url"
+                                    name="liveUrl"
+                                    value={formData.liveUrl}
+                                    onChange={handleChange}
+                                    placeholder="https://"
+                                    className="w-full px-4 py-3 rounded-xl bg-surface-variant/30 border border-outline/20 focus:border-primary outline-none transition-colors"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium mb-2 text-on-surface">Repository URL</label>
+                                <input
+                                    type="url"
+                                    name="repoUrl"
+                                    value={formData.repoUrl}
+                                    onChange={handleChange}
+                                    placeholder="https://"
+                                    className="w-full px-4 py-3 rounded-xl bg-surface-variant/30 border border-outline/20 focus:border-primary outline-none transition-colors"
+                                />
+                            </div>
+                        </div>
+                    </>
+                ) : (
                     <div className="grid md:grid-cols-2 gap-6">
                         <div>
-                            <label className="block text-sm font-medium mb-2 text-on-surface">Tech Stack (comma separated)</label>
-                            <input
-                                type="text"
-                                name="techStack"
-                                value={formData.techStack}
-                                onChange={handleChange}
-                                placeholder="React, Next.js, Tailwind"
-                                className="w-full px-4 py-3 rounded-xl bg-surface-variant/30 border border-outline/20 focus:border-primary outline-none"
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium mb-2 text-on-surface">Tools (comma separated)</label>
+                            <label className="block text-sm font-medium mb-2 text-on-surface">Tools / Software (comma separated)</label>
                             <input
                                 type="text"
                                 name="tools"
                                 value={formData.tools}
                                 onChange={handleChange}
-                                placeholder="VS Code, Postman"
-                                className="w-full px-4 py-3 rounded-xl bg-surface-variant/30 border border-outline/20 focus:border-primary outline-none"
+                                placeholder="Photoshop, Illustrator, Figma"
+                                className="w-full px-4 py-3 rounded-xl bg-surface-variant/30 border border-outline/20 focus:border-primary outline-none transition-colors"
                             />
                         </div>
                     </div>
-
-                    <div className="grid md:grid-cols-2 gap-6">
-                        <div>
-                            <label className="block text-sm font-medium mb-2 text-on-surface">Live URL</label>
-                            <input
-                                type="url"
-                                name="liveUrl"
-                                value={formData.liveUrl}
-                                onChange={handleChange}
-                                placeholder="https://"
-                                className="w-full px-4 py-3 rounded-xl bg-surface-variant/30 border border-outline/20 focus:border-primary outline-none"
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium mb-2 text-on-surface">Repository URL</label>
-                            <input
-                                type="url"
-                                name="repoUrl"
-                                value={formData.repoUrl}
-                                onChange={handleChange}
-                                placeholder="https://"
-                                className="w-full px-4 py-3 rounded-xl bg-surface-variant/30 border border-outline/20 focus:border-primary outline-none"
-                            />
-                        </div>
-                    </div>
-                </>
-            )}
-
-            {!isWebOrApp && (
-                <div className="grid md:grid-cols-2 gap-6">
-                    <div>
-                        <label className="block text-sm font-medium mb-2 text-on-surface">Tools / Software (comma separated)</label>
-                        <input
-                            type="text"
-                            name="tools"
-                            value={formData.tools}
-                            onChange={handleChange}
-                            placeholder="Photoshop, Illustrator, Figma"
-                            className="w-full px-4 py-3 rounded-xl bg-surface-variant/30 border border-outline/20 focus:border-primary outline-none"
-                        />
-                    </div>
-                </div>
-            )}
-
-            <div className="flex gap-8 pt-4">
-                <label className="flex items-center gap-2 cursor-pointer">
-                    <input
-                        type="checkbox"
-                        name="featured"
-                        checked={formData.featured}
-                        onChange={handleChange}
-                        className="w-5 h-5 rounded text-primary focus:ring-primary"
-                    />
-                    <span className="font-medium">Featured Project</span>
-                </label>
-
-                <label className="flex items-center gap-2 cursor-pointer">
-                    <input
-                        type="checkbox"
-                        name="isFreelance"
-                        checked={formData.isFreelance}
-                        onChange={handleChange}
-                        className="w-5 h-5 rounded text-primary focus:ring-primary"
-                    />
-                    <span className="font-medium">Freelance Project</span>
-                </label>
+                )}
             </div>
 
             <button
                 type="submit"
                 disabled={loading}
-                className="w-full px-8 py-4 rounded-full bg-primary text-on-primary font-bold shadow-lg hover:shadow-xl hover:bg-primary/90 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed mt-8"
+                className="w-full px-8 py-5 rounded-2xl bg-primary text-on-primary font-bold text-lg shadow-[0_0_20px_rgba(var(--primary),0.3)] hover:shadow-[0_0_30px_rgba(var(--primary),0.5)] hover:bg-primary/90 hover:-translate-y-1 transition-all flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-none mt-8"
             >
                 {loading ? (
                     <>
-                        <Loader2 className="animate-spin" size={20} />
-                        Saving...
+                        <Loader2 className="animate-spin" size={24} />
+                        Saving Project...
                     </>
                 ) : (
                     <>
-                        <Save size={20} />
+                        <Save size={24} />
                         Save Project
                     </>
                 )}

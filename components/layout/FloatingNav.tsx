@@ -142,6 +142,8 @@ export function FloatingNav() {
         dragInstance = Draggable.create(nav, {
             type: "x,y",
             bounds: "body",
+            allowEventDefault: true,
+            dragClickables: false,
             onDragEnd: function () {
                 const rect = nav.getBoundingClientRect();
                 const windowWidth = window.innerWidth;
@@ -176,7 +178,6 @@ export function FloatingNav() {
             ref={navRef}
             className={`fixed z-50 glass backdrop-blur-xl rounded-2xl p-3 shadow-lg cursor-move select-none transition-opacity ${isVertical ? "flex-col space-y-2" : "flex-row space-x-2"
                 } flex items-center`}
-            style={{ touchAction: "none" }}
         >
             {/* Navigation Links */}
             {navLinks.map((link) => {
@@ -185,6 +186,7 @@ export function FloatingNav() {
                     <Link
                         key={link.href}
                         href={link.href}
+                        data-clickable="true"
                         className={`p-3 rounded-lg transition-all hover:scale-110 group relative ${pathname === link.href
                                 ? "bg-primary text-on-primary"
                                 : "text-on-surface hover:bg-surface-variant"

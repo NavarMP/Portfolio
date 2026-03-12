@@ -70,7 +70,7 @@ export default async function ProjectDetailPage({ params }: PageProps) {
                     className="object-cover"
                     priority
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent"></div>
+                <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-background/50 via-background/20 to-transparent pointer-events-none"></div>
             </div>
 
             {/* Content */}
@@ -165,15 +165,29 @@ export default async function ProjectDetailPage({ params }: PageProps) {
 
                 {/* Media Gallery */}
                 {project.media && project.media.length > 0 && (
-                    <div className="mb-16">
+                    <div className="mb-16 animate-slide-in-up" style={{ animationDelay: '0.2s' }}>
                         <h3 className="text-3xl font-bold font-display mb-8">Project Gallery</h3>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            {project.media.map((mediaUrl: string, index: number) => (
+                            {project.media.map((item: { type: string, url: string }, index: number) => (
                                 <div
                                     key={index}
-                                    className="relative h-96 rounded-3xl overflow-hidden bg-surface-variant/20 border border-outline/10"
+                                    className="relative aspect-video rounded-3xl overflow-hidden bg-surface-variant/20 border border-outline/10 group shadow-lg"
                                 >
-                                    <Image src={mediaUrl} alt={`${project.title} - Image ${index + 1}`} fill className="object-cover" />
+                                    {item.type === 'video' ? (
+                                        <video
+                                            src={item.url}
+                                            controls
+                                            playsInline
+                                            className="w-full h-full object-cover"
+                                        />
+                                    ) : (
+                                        <Image
+                                            src={item.url}
+                                            alt={`${project.title} - Gallery item ${index + 1}`}
+                                            fill
+                                            className="object-cover group-hover:scale-105 transition-transform duration-700"
+                                        />
+                                    )}
                                 </div>
                             ))}
                         </div>

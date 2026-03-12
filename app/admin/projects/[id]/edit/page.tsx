@@ -42,7 +42,7 @@ export default async function EditProjectPage({ params }: { params: Promise<{ id
                     </h1>
                 </div>
 
-                <div className="bg-surface rounded-3xl p-8 border border-outline/10">
+                <div className="mt-8">
                     <ProjectForm initialData={serializedProject} />
                 </div>
             </div>
