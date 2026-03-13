@@ -4,7 +4,6 @@ const ProjectSchema = new Schema(
     {
         title: {
             type: String,
-            required: [true, "Project title is required"],
             trim: true,
         },
         slug: {
@@ -15,7 +14,6 @@ const ProjectSchema = new Schema(
         },
         description: {
             type: String,
-            required: [true, "Project description is required"],
         },
         category: {
             type: String,
@@ -36,11 +34,10 @@ const ProjectSchema = new Schema(
         },
         coverImage: {
             type: String, // Cloudinary URL
-            required: [true, "Cover image is required"],
         },
         media: [
             {
-                type: { type: String, enum: ['image', 'video'] }, // Explicitly define inner 'type'
+                type: { type: String, enum: ['image', 'video', 'document'] }, // Explicitly define inner 'type'
                 url: String,
             },
         ],
@@ -78,6 +75,5 @@ const ProjectSchema = new Schema(
 
 // Index for faster queries
 ProjectSchema.index({ category: 1, featured: -1, order: 1 });
-ProjectSchema.index({ slug: 1 });
 
 export const Project = models.Project || model("Project", ProjectSchema);

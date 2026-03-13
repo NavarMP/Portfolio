@@ -2,7 +2,9 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Save, Loader2, X, Plus, Image as ImageIcon, Video, Link as LinkIcon, Info } from "lucide-react";
+import { Save, Loader2, X, Image as ImageIcon, Video, Link as LinkIcon, Info, ImagePlus } from "lucide-react";
+import MediaViewer from "./MediaViewer";
+import MediaUploader from "./MediaUploader";
 
 interface ProjectFormData {
     title: string;
@@ -18,12 +20,13 @@ interface ProjectFormData {
     featured: boolean;
     techStack: string;
     tools: string;
-    media: Array<{ type: 'image' | 'video', url: string }>;
+    media: Array<{ type: 'image' | 'video' | 'document', url: string }>;
 }
 
 export default function ProjectForm({ initialData }: { initialData?: any }) {
     const router = useRouter();
     const [loading, setLoading] = useState(false);
+    const [compressMedia, setCompressMedia] = useState(true);
 
     // Basic state for form fields
     const [formData, setFormData] = useState<ProjectFormData>({
@@ -98,10 +101,29 @@ export default function ProjectForm({ initialData }: { initialData?: any }) {
         e.preventDefault();
         setLoading(true);
 
+        // Auto-generate slug if missing
+        let finalSlug = formData.slug;
+        if (!finalSlug) {
+            finalSlug = formData.title 
+                ? formData.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '')
+                : `project-${Date.now().toString(36)}`;
+        }
+
+        // Auto-select cover from gallery if missing
+        let finalCover = formData.coverImage;
+        if (!finalCover && formData.media.length > 0) {
+            const firstImage = formData.media.find(m => m.type === 'image');
+            if (firstImage) {
+                finalCover = firstImage.url;
+            }
+        }
+
         try {
             // Convert comma-separated strings to arrays
             const payload = {
                 ...formData,
+                slug: finalSlug,
+                coverImage: finalCover,
                 techStack: formData.techStack.split(",").map((s: string) => s.trim()).filter(Boolean),
                 tools: formData.tools.split(",").map((s: string) => s.trim()).filter(Boolean),
                 media: formData.media,
@@ -130,39 +152,6 @@ export default function ProjectForm({ initialData }: { initialData?: any }) {
         }
     };
 
-    const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (!file) return;
-
-        // Show loading state/preview if needed
-        const button = e.target.parentElement;
-        if (button) button.style.opacity = "0.5";
-
-        const formDataVal = new FormData();
-        formDataVal.append("file", file);
-        formDataVal.append("folder", "navarmp-projects");
-
-        try {
-            const res = await fetch("/api/upload", {
-                method: "POST",
-                body: formDataVal,
-            });
-
-            if (res.ok) {
-                const data = await res.json();
-                setFormData(prev => ({
-                    ...prev,
-                    coverImage: data.url
-                }));
-            } else {
-                console.error("Upload failed");
-            }
-        } catch (error) {
-            console.error("Error uploading image:", error);
-        } finally {
-            if (button) button.style.opacity = "1";
-        }
-    };
 
     const isWebOrApp = ["web-development", "app-development"].includes(formData.category);
 
@@ -182,37 +171,37 @@ export default function ProjectForm({ initialData }: { initialData?: any }) {
 
                 <div className="grid md:grid-cols-2 gap-6">
                     <div>
-                        <label className="block text-sm font-medium mb-2 text-on-surface">Project Title *</label>
+                        <label className="block text-sm font-medium mb-2 text-on-surface">Project Title</label>
                         <input
                             type="text"
                             name="title"
                             value={formData.title}
                             onChange={handleChange}
-                            required
+                            placeholder="e.g. Awesome Project"
                             className="w-full px-4 py-3 rounded-xl bg-surface-variant/30 border border-outline/20 focus:border-primary outline-none transition-colors"
                         />
                     </div>
                     <div>
-                        <label className="block text-sm font-medium mb-2 text-on-surface">Slug *</label>
+                        <label className="block text-sm font-medium mb-2 text-on-surface">Slug</label>
                         <input
                             type="text"
                             name="slug"
                             value={formData.slug}
                             onChange={handleChange}
-                            required
+                            placeholder="Auto-generated if left empty"
                             className="w-full px-4 py-3 rounded-xl bg-surface-variant/30 border border-outline/20 focus:border-primary outline-none transition-colors"
                         />
                     </div>
                 </div>
 
                 <div>
-                    <label className="block text-sm font-medium mb-2 text-on-surface">Description *</label>
+                    <label className="block text-sm font-medium mb-2 text-on-surface">Description</label>
                     <textarea
                         name="description"
                         value={formData.description}
                         onChange={handleChange}
-                        required
                         rows={4}
+                        placeholder="Write a brief overview of the project..."
                         className="w-full px-4 py-3 rounded-xl bg-surface-variant/30 border border-outline/20 focus:border-primary outline-none resize-none transition-colors"
                     />
                 </div>
@@ -294,33 +283,34 @@ export default function ProjectForm({ initialData }: { initialData?: any }) {
                         <p className="text-sm text-on-surface-variant mt-1">Cover image and display gallery content.</p>
                     </div>
                 </div>
+                
+                <div className="flex items-center gap-3 p-4 rounded-xl border border-outline/20 bg-surface-variant/10">
+                    <input
+                        type="checkbox"
+                        id="compressOption"
+                        checked={compressMedia}
+                        onChange={(e) => setCompressMedia(e.target.checked)}
+                        className="w-5 h-5 rounded text-primary focus:ring-primary cursor-pointer border-outline/30"
+                    />
+                    <div>
+                        <label htmlFor="compressOption" className="font-medium text-sm text-on-surface cursor-pointer">
+                            Compress Images & Convert to WebP
+                        </label>
+                        <p className="text-xs text-on-surface-variant">Reduces size for faster loading. Best quality is maintained.</p>
+                    </div>
+                </div>
 
                 <div>
-                    <label className="block text-sm font-medium mb-3 text-on-surface">Cover Image *</label>
+                    <label className="block text-sm font-medium mb-3 text-on-surface">Cover Image</label>
                     <div className="flex flex-col md:flex-row gap-6">
-                        <div className="flex-1 relative order-2 md:order-1">
-                            <div className="relative">
-                                <input
-                                    type="text"
-                                    name="coverImage"
-                                    value={formData.coverImage}
-                                    onChange={handleChange}
-                                    required
-                                    placeholder="Paste URL or upload file"
-                                    className="w-full px-4 py-3 rounded-xl bg-surface-variant/30 border border-outline/20 focus:border-primary outline-none pr-32 transition-colors"
-                                />
-                                <div className="absolute right-2 top-1/2 -translate-y-1/2 overflow-hidden">
-                                    <input
-                                        type="file"
-                                        accept="image/*"
-                                        onChange={handleImageUpload}
-                                        className="absolute inset-0 opacity-0 cursor-pointer"
-                                    />
-                                    <div className="px-4 py-1.5 bg-primary text-on-primary text-xs font-bold rounded-lg hover:bg-primary/90 transition-colors flex items-center gap-1 cursor-pointer">
-                                        <span>Upload</span>
-                                    </div>
-                                </div>
-                            </div>
+                        <div className="flex-1 order-2 md:order-1">
+                            <MediaUploader 
+                                multiple={false}
+                                compressMedia={compressMedia}
+                                title="Upload Cover Image"
+                                description="Drag & drop your hero image here"
+                                onUploadComplete={(res) => setFormData(prev => ({ ...prev, coverImage: res[0].url }))}
+                            />
                         </div>
                         <div className="order-1 md:order-2">
                             {formData.coverImage ? (
@@ -338,85 +328,67 @@ export default function ProjectForm({ initialData }: { initialData?: any }) {
                 </div>
 
                 <div className="pt-6 border-t border-outline/10">
-                    <label className="block text-sm font-medium mb-3 text-on-surface">Project Gallery</label>
-                    <p className="text-sm text-on-surface-variant mb-4">Add images and videos to showcase the project on its details page.</p>
-                    
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {formData.media.map((item: { type: string, url: string }, index: number) => (
-                            <div key={index} className="relative aspect-video bg-surface-variant/20 rounded-2xl overflow-hidden group border border-outline/10 shadow-sm">
-                                {item.type === 'video' ? (
-                                    <div className="relative w-full h-full">
-                                        <video src={item.url} className="w-full h-full object-cover" />
-                                        <div className="absolute top-2 left-2 p-1.5 bg-black/50 backdrop-blur-md text-white rounded-lg">
-                                            <Video size={14} />
-                                        </div>
-                                    </div>
-                                ) : (
-                                    <img src={item.url} alt={`Media ${index}`} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                                )}
-                                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                    <button
-                                        type="button"
-                                        onClick={() => {
-                                            setFormData(prev => ({
-                                                ...prev,
-                                                media: prev.media.filter((_, i) => i !== index)
-                                            }));
-                                        }}
-                                        className="p-3 bg-red-500 hover:bg-red-600 text-white rounded-full transition-colors transform hover:scale-110 shadow-lg"
-                                    >
-                                        <X size={18} />
-                                    </button>
-                                </div>
-                            </div>
-                        ))}
-
-                        <div className="relative aspect-video bg-surface-variant/5 rounded-2xl border-2 border-dashed border-outline/20 hover:border-primary/50 hover:bg-surface-variant/10 transition-all flex flex-col items-center justify-center text-on-surface-variant cursor-pointer group">
-                            <input
-                                type="file"
-                                multiple
-                                onChange={async (e) => {
-                                    const files = e.target.files;
-                                    if (!files?.length) return;
-
-                                    const container = e.target.parentElement;
-                                    if (container) container.style.opacity = "0.5";
-
-                                    for (let i = 0; i < files.length; i++) {
-                                        const file = files[i];
-                                        const formDataVal = new FormData();
-                                        formDataVal.append("file", file);
-                                        formDataVal.append("folder", "navarmp-project-media");
-
-                                        try {
-                                            const res = await fetch("/api/upload", {
-                                                method: "POST",
-                                                body: formDataVal,
-                                            });
-
-                                            if (res.ok) {
-                                                const data = await res.json();
-                                                const type = file.type.startsWith('video/') ? 'video' : 'image';
-                                                setFormData(prev => ({
-                                                    ...prev,
-                                                    media: [...prev.media, { type, url: data.url }]
-                                                }));
-                                            }
-                                        } catch (error) {
-                                            console.error("Error uploading media:", error);
-                                        }
-                                    }
-                                    if (container) container.style.opacity = "1";
-                                }}
-                                className="absolute inset-0 opacity-0 cursor-pointer"
-                            />
-                            <div className="w-12 h-12 rounded-full bg-surface shadow-sm flex items-center justify-center mb-3 group-hover:scale-110 group-hover:text-primary transition-all duration-300">
-                                <Plus size={24} />
-                            </div>
-                            <span className="text-sm font-medium">Add Media Files</span>
-                            <span className="text-xs mt-1 opacity-70">Images or Videos</span>
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
+                        <div>
+                            <label className="block text-sm font-medium mb-1 text-on-surface">Project Gallery</label>
+                            <p className="text-sm text-on-surface-variant">Add images, videos, and PDFs to showcase the project.</p>
+                        </div>
+                        <div className="text-xs text-on-surface-variant px-3 py-1.5 bg-surface-variant/10 rounded-lg inline-block border border-outline/10 h-fit">
+                            <b>Formats:</b> Images, Videos, PDFs
                         </div>
                     </div>
+                    
+                    <div className="mb-6">
+                        <MediaUploader 
+                            multiple={true}
+                            compressMedia={compressMedia}
+                            title="Add Media to Gallery"
+                            description="Drag & drop files or provide direct links"
+                            onUploadComplete={(res) => setFormData(prev => ({ ...prev, media: [...prev.media, ...res] }))}
+                        />
+                    </div>
+                    
+                    {formData.media.length > 0 && (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-8">
+                            {formData.media.map((item: { type: string, url: string }, index: number) => (
+                                <div key={index} className="relative aspect-video bg-surface-variant/20 rounded-2xl overflow-hidden group border border-outline/10 shadow-sm flex flex-col items-center justify-center">
+                                    <MediaViewer type={item.type} url={item.url} className="w-full h-full object-cover" />
+                                    
+                                    {item.type === 'video' && (
+                                        <div className="absolute top-2 left-2 p-1.5 bg-black/50 backdrop-blur-md text-white rounded-lg pointer-events-none">
+                                            <Video size={14} />
+                                        </div>
+                                    )}
+                                    
+                                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3">
+                                        {item.type === 'image' && (
+                                            <button
+                                                type="button"
+                                                title="Set as Cover"
+                                                onClick={() => setFormData(prev => ({ ...prev, coverImage: item.url }))}
+                                                className="p-3 bg-blue-500 hover:bg-blue-600 text-white rounded-full transition-colors transform hover:scale-110 shadow-lg"
+                                            >
+                                                <ImagePlus size={18} />
+                                            </button>
+                                        )}
+                                        <button
+                                            type="button"
+                                            title="Remove Media"
+                                            onClick={() => {
+                                                setFormData(prev => ({
+                                                    ...prev,
+                                                    media: prev.media.filter((_, i) => i !== index)
+                                                }));
+                                            }}
+                                            className="p-3 bg-red-500 hover:bg-red-600 text-white rounded-full transition-colors transform hover:scale-110 shadow-lg"
+                                        >
+                                            <X size={18} />
+                                        </button>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
                 </div>
             </div>
 

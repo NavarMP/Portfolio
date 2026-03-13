@@ -38,6 +38,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     useEffect(() => {
         const root = document.documentElement;
         let effectiveTheme: "light" | "dark" = "light";
+        let cleanup: (() => void) | undefined;
 
         if (theme === "system") {
             const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
@@ -54,7 +55,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
             };
 
             mediaQuery.addEventListener("change", handleChange);
-            return () => mediaQuery.removeEventListener("change", handleChange);
+            cleanup = () => mediaQuery.removeEventListener("change", handleChange);
         } else {
             effectiveTheme = theme;
         }
@@ -68,6 +69,8 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
         // Save to localStorage
         localStorage.setItem("theme", theme);
+
+        return cleanup;
     }, [theme, primaryColor]);
 
     // Apply primary color changes

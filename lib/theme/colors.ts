@@ -141,8 +141,6 @@ function hexToHslString(hex: string): string {
 }
 
 export function generatePalette(primaryColor: string, isDark: boolean = false): ColorPalette {
-    const { h, s, l } = hexToHSL(primaryColor);
-
     // Neutral colors for background/surface (Zinc-like)
     const neutral = {
         50: "#fafafa",
@@ -158,10 +156,18 @@ export function generatePalette(primaryColor: string, isDark: boolean = false): 
         950: "#09090b",
     };
 
-    if (isDark) {
-        const primaryHex = hslToHex(h, Math.max(s - 10, 60), 80);
-        const onPrimaryHex = hslToHex(h, s, 20);
+    // Use the user's exact primary color, ensuring they get what they clicked
+    const primaryHex = primaryColor;
 
+    // Calculate true relative luminance to determine contrasting text (YIQ formula)
+    const hex = primaryColor.replace("#", "");
+    const r = parseInt(hex.substring(0, 2), 16) || 0;
+    const g = parseInt(hex.substring(2, 4), 16) || 0;
+    const b = parseInt(hex.substring(4, 6), 16) || 0;
+    const yiq = (r * 299 + g * 587 + b * 114) / 1000;
+    const onPrimaryHex = yiq >= 128 ? "#000000" : "#ffffff";
+
+    if (isDark) {
         return {
             "--background": hexToHslString(neutral[950]),
             "--foreground": hexToHslString(neutral[50]),
@@ -181,7 +187,7 @@ export function generatePalette(primaryColor: string, isDark: boolean = false): 
             "--destructive-foreground": "0 0% 98%", // #fef2f2
             "--border": hexToHslString(neutral[800]),
             "--input": hexToHslString(neutral[800]),
-            "--ring": hexToHslString(hslToHex(h, Math.max(s - 10, 60), 60)),
+            "--ring": hexToHslString(primaryHex),
             "--radius": "0.75rem",
 
             // MD3 Compat (Keep as Hex)
@@ -197,9 +203,6 @@ export function generatePalette(primaryColor: string, isDark: boolean = false): 
     }
 
     // Light Mode
-    const primaryHex = hslToHex(h, s, 40);
-    const onPrimaryHex = "#ffffff";
-
     return {
         "--background": "0 0% 100%", // #ffffff
         "--foreground": hexToHslString(neutral[950]),

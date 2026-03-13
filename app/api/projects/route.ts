@@ -36,8 +36,8 @@ export async function POST(request: Request) {
         const body = await request.json();
 
         // Basic server validation
-        if (!body.title || !body.slug || !body.description || !body.category) {
-            return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+        if (!body.slug || !body.category) {
+            return NextResponse.json({ error: "Missing required fields (slug, category)" }, { status: 400 });
         }
 
         const project = await Project.create(body);
