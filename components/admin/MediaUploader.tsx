@@ -1,29 +1,37 @@
 "use client";
 
 import { useState, useRef, DragEvent } from "react";
-import { UploadCloud, Link as LinkIcon, Loader2, Plus } from "lucide-react";
+import { UploadCloud, Link as LinkIcon, Loader2, Plus, Crop } from "lucide-react";
 import { compressImage } from "@/lib/compressImage";
+import ImageCropper from "./ImageCropper";
 
 interface MediaUploaderProps {
     onUploadComplete: (media: { type: 'image' | 'video' | 'document', url: string }[]) => void;
     multiple?: boolean;
-    compressMedia?: boolean;
+    compressOptions?: { compress: boolean; convertToWebp: boolean };
     title?: string;
     description?: string;
     folder?: string;
+    cropRatio?: number;
 }
 
 export default function MediaUploader({ 
     onUploadComplete, 
     multiple = false, 
-    compressMedia = true,
+    compressOptions = { compress: true, convertToWebp: true },
     title = "Upload Media",
     description = "Drag & drop files or click to browse",
-    folder = "navarmp-project-media"
+    folder = "navarmp-project-media",
+    cropRatio
 }: MediaUploaderProps) {
     const [isDragging, setIsDragging] = useState(false);
     const [isUploading, setIsUploading] = useState(false);
     const [urlInput, setUrlInput] = useState("");
+    
+    // Crop state
+    const [pendingCropFile, setPendingCropFile] = useState<{ file: File, url: string } | null>(null);
+    const [isCropping, setIsCropping] = useState(false);
+    
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const handleDragOver = (e: DragEvent<HTMLDivElement>) => {
@@ -48,9 +56,36 @@ export default function MediaUploader({
     const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const files = Array.from(e.target.files || []);
         if (files.length > 0) {
-            await processFiles(multiple ? files : [files[0]]);
+            const firstFile = files[0];
+            if (cropRatio && firstFile.type.startsWith('image/')) {
+                // If crop requested, only handle the first image
+                setPendingCropFile({
+                    file: firstFile,
+                    url: URL.createObjectURL(firstFile)
+                });
+                setIsCropping(true);
+            } else {
+                await processFiles(multiple ? files : [firstFile]);
+            }
         }
         if (fileInputRef.current) fileInputRef.current.value = "";
+    };
+
+    const handleCropComplete = async (croppedFile: File) => {
+        setIsCropping(false);
+        if (pendingCropFile) {
+            URL.revokeObjectURL(pendingCropFile.url);
+        }
+        setPendingCropFile(null);
+        await processFiles([croppedFile]);
+    };
+
+    const handleCropCancel = () => {
+        setIsCropping(false);
+        if (pendingCropFile) {
+            URL.revokeObjectURL(pendingCropFile.url);
+        }
+        setPendingCropFile(null);
     };
 
     const processFiles = async (files: File[]) => {
@@ -61,8 +96,8 @@ export default function MediaUploader({
             for (let i = 0; i < files.length; i++) {
                 let file = files[i];
 
-                if (compressMedia && file.type.startsWith('image/')) {
-                    file = await compressImage(file);
+                if (file.type.startsWith('image/')) {
+                    file = await compressImage(file, compressOptions);
                 }
 
                 const formDataVal = new FormData();
@@ -177,6 +212,16 @@ export default function MediaUploader({
                     <Plus size={18} /> Add
                 </button>
             </div>
+
+            {/* Cropper Modal */}
+            {isCropping && pendingCropFile && cropRatio && (
+                <ImageCropper
+                    imageSrc={pendingCropFile.url}
+                    aspectRatio={cropRatio}
+                    onCropComplete={handleCropComplete}
+                    onCancel={handleCropCancel}
+                />
+            )}
         </div>
     );
 }

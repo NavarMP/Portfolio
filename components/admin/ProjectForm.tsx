@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Save, Loader2, X, Image as ImageIcon, Video, Link as LinkIcon, Info, ImagePlus } from "lucide-react";
 import MediaViewer from "./MediaViewer";
@@ -14,6 +14,7 @@ interface ProjectFormData {
     subcategory: string;
     client: string;
     isFreelance: boolean;
+    isArchived: boolean;
     coverImage: string;
     liveUrl: string;
     repoUrl: string;
@@ -21,12 +22,15 @@ interface ProjectFormData {
     techStack: string;
     tools: string;
     media: Array<{ type: 'image' | 'video' | 'document', url: string }>;
+    externalLinks: Array<{ platform: string, url: string }>;
 }
 
 export default function ProjectForm({ initialData }: { initialData?: any }) {
     const router = useRouter();
     const [loading, setLoading] = useState(false);
-    const [compressMedia, setCompressMedia] = useState(true);
+    const [compressImageEnabled, setCompressImageEnabled] = useState(true);
+    const [convertToWebpEnabled, setConvertToWebpEnabled] = useState(true);
+    const [isSlugManuallyEdited, setIsSlugManuallyEdited] = useState(!!initialData?.slug);
 
     // Basic state for form fields
     const [formData, setFormData] = useState<ProjectFormData>({
@@ -37,6 +41,7 @@ export default function ProjectForm({ initialData }: { initialData?: any }) {
         subcategory: initialData?.subcategory || "",
         client: initialData?.client || "",
         isFreelance: initialData?.isFreelance || false,
+        isArchived: initialData?.isArchived || false,
         coverImage: initialData?.coverImage || "",
         liveUrl: initialData?.liveUrl || "",
         repoUrl: initialData?.repoUrl || "",
@@ -44,6 +49,7 @@ export default function ProjectForm({ initialData }: { initialData?: any }) {
         techStack: initialData?.techStack?.join(", ") || "",
         tools: initialData?.tools?.join(", ") || "",
         media: initialData?.media || [],
+        externalLinks: initialData?.externalLinks || [],
     });
 
     // Category Data
@@ -83,10 +89,21 @@ export default function ProjectForm({ initialData }: { initialData?: any }) {
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         const { name, value, type } = e.target;
-        setFormData(prev => ({
-            ...prev,
-            [name]: type === "checkbox" ? (e.target as HTMLInputElement).checked : value
-        }));
+        
+        setFormData(prev => {
+            const updated = {
+                ...prev,
+                [name]: type === "checkbox" ? (e.target as HTMLInputElement).checked : value
+            };
+
+            if (name === "title" && !isSlugManuallyEdited) {
+                updated.slug = value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
+            } else if (name === "slug") {
+                setIsSlugManuallyEdited(true);
+            }
+
+            return updated;
+        });
     };
 
     const handleCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -95,6 +112,59 @@ export default function ProjectForm({ initialData }: { initialData?: any }) {
             category: e.target.value,
             subcategory: "" // Reset subcategory when category changes
         }));
+    };
+
+    // Form caching logic
+    useEffect(() => {
+        if (!initialData) {
+            const draft = localStorage.getItem("draft-project");
+            if (draft) {
+                try {
+                    const parsed = JSON.parse(draft);
+                    if (window.confirm("You have an unsaved project draft. Would you like to restore it?")) {
+                        setFormData(parsed);
+                        if (parsed.slug) setIsSlugManuallyEdited(true);
+                    } else {
+                        localStorage.removeItem("draft-project");
+                    }
+                } catch(e) { /* silent fail */ }
+            }
+        }
+    }, [initialData]);
+
+    useEffect(() => {
+        if (!initialData && formData.title) {
+            const timeout = setTimeout(() => {
+                localStorage.setItem("draft-project", JSON.stringify(formData));
+            }, 500);
+            return () => clearTimeout(timeout);
+        }
+    }, [formData, initialData]);
+
+    const handleDeleteMedia = async (url: string, type: 'cover' | 'gallery', index?: number) => {
+        if (!confirm("Are you sure you want to delete this media? This will permanently remove it from storage.")) return;
+        
+        try {
+            // Optimistic UI update
+            if (type === 'cover') {
+                setFormData(prev => ({ ...prev, coverImage: "" }));
+            } else if (type === 'gallery' && index !== undefined) {
+                setFormData(prev => ({
+                    ...prev,
+                    media: prev.media.filter((_, i) => i !== index)
+                }));
+            }
+
+            // Fire delete to Cloudinary
+            await fetch('/api/upload', {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ url })
+            });
+        } catch (error) {
+            console.error("Failed to delete media:", error);
+            // Revert state if necessary in a more robust implementation, but this is fine for now
+        }
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -127,6 +197,7 @@ export default function ProjectForm({ initialData }: { initialData?: any }) {
                 techStack: formData.techStack.split(",").map((s: string) => s.trim()).filter(Boolean),
                 tools: formData.tools.split(",").map((s: string) => s.trim()).filter(Boolean),
                 media: formData.media,
+                externalLinks: formData.externalLinks.filter(l => l.platform.trim() && l.url.trim()),
             };
 
             const url = initialData
@@ -142,6 +213,7 @@ export default function ProjectForm({ initialData }: { initialData?: any }) {
             });
 
             if (res.ok) {
+                localStorage.removeItem("draft-project");
                 router.push("/admin/projects");
                 router.refresh();
             }
@@ -269,6 +341,18 @@ export default function ProjectForm({ initialData }: { initialData?: any }) {
                             <span className="font-medium text-sm">Featured</span>
                         </label>
                     </div>
+                    <div className="flex items-center gap-4 mt-6 md:mt-8">
+                        <label className="flex items-center gap-3 cursor-pointer p-3 md:p-4 rounded-xl border border-outline/20 bg-surface-variant/10 hover:bg-surface-variant/30 transition-colors flex-1 w-full text-red-500 hover:bg-red-500/10">
+                            <input
+                                type="checkbox"
+                                name="isArchived"
+                                checked={formData.isArchived}
+                                onChange={handleChange}
+                                className="w-5 h-5 rounded text-red-500 focus:ring-red-500"
+                            />
+                            <span className="font-medium text-sm">Archived (Hide from public)</span>
+                        </label>
+                    </div>
                 </div>
             </div>
 
@@ -284,19 +368,36 @@ export default function ProjectForm({ initialData }: { initialData?: any }) {
                     </div>
                 </div>
                 
-                <div className="flex items-center gap-3 p-4 rounded-xl border border-outline/20 bg-surface-variant/10">
-                    <input
-                        type="checkbox"
-                        id="compressOption"
-                        checked={compressMedia}
-                        onChange={(e) => setCompressMedia(e.target.checked)}
-                        className="w-5 h-5 rounded text-primary focus:ring-primary cursor-pointer border-outline/30"
-                    />
-                    <div>
-                        <label htmlFor="compressOption" className="font-medium text-sm text-on-surface cursor-pointer">
-                            Compress Images & Convert to WebP
-                        </label>
-                        <p className="text-xs text-on-surface-variant">Reduces size for faster loading. Best quality is maintained.</p>
+                <div className="flex flex-col gap-3 p-4 rounded-xl border border-outline/20 bg-surface-variant/10">
+                    <div className="flex items-center gap-3">
+                        <input
+                            type="checkbox"
+                            id="compressImageSetting"
+                            checked={compressImageEnabled}
+                            onChange={(e) => setCompressImageEnabled(e.target.checked)}
+                            className="w-5 h-5 rounded text-primary focus:ring-primary cursor-pointer border-outline/30"
+                        />
+                        <div>
+                            <label htmlFor="compressImageSetting" className="font-medium text-sm text-on-surface cursor-pointer">
+                                Compress Images
+                            </label>
+                            <p className="text-xs text-on-surface-variant">Maintains high quality while reducing file size for faster loading.</p>
+                        </div>
+                    </div>
+                    <div className="flex items-center gap-3 mt-2 border-t border-outline/10 pt-4">
+                        <input
+                            type="checkbox"
+                            id="convertToWebpSetting"
+                            checked={convertToWebpEnabled}
+                            onChange={(e) => setConvertToWebpEnabled(e.target.checked)}
+                            className="w-5 h-5 rounded text-primary focus:ring-primary cursor-pointer border-outline/30"
+                        />
+                        <div>
+                            <label htmlFor="convertToWebpSetting" className="font-medium text-sm text-on-surface cursor-pointer">
+                                Convert to WebP format
+                            </label>
+                            <p className="text-xs text-on-surface-variant">Highly recommended for web optimization and best performance.</p>
+                        </div>
                     </div>
                 </div>
 
@@ -306,9 +407,10 @@ export default function ProjectForm({ initialData }: { initialData?: any }) {
                         <div className="flex-1 order-2 md:order-1">
                             <MediaUploader 
                                 multiple={false}
-                                compressMedia={compressMedia}
+                                compressOptions={{ compress: compressImageEnabled, convertToWebp: convertToWebpEnabled }}
                                 title="Upload Cover Image"
-                                description="Drag & drop your hero image here"
+                                description="16:9 aspect ratio applied automatically"
+                                cropRatio={16 / 9}
                                 onUploadComplete={(res) => setFormData(prev => ({ ...prev, coverImage: res[0].url }))}
                             />
                         </div>
@@ -316,6 +418,16 @@ export default function ProjectForm({ initialData }: { initialData?: any }) {
                             {formData.coverImage ? (
                                 <div className="aspect-video w-full md:w-64 rounded-xl overflow-hidden border border-outline/20 relative shadow-md group">
                                     <img src={formData.coverImage} alt="Cover Preview" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                        <button
+                                            type="button"
+                                            title="Remove Cover Image"
+                                            onClick={() => handleDeleteMedia(formData.coverImage, 'cover')}
+                                            className="p-3 bg-red-500 hover:bg-red-600 text-white rounded-full transition-colors transform hover:scale-110 shadow-lg"
+                                        >
+                                            <X size={18} />
+                                        </button>
+                                    </div>
                                 </div>
                             ) : (
                                 <div className="aspect-video w-full md:w-64 rounded-xl border border-dashed border-outline/20 bg-surface-variant/10 flex flex-col items-center justify-center text-on-surface-variant">
@@ -341,7 +453,7 @@ export default function ProjectForm({ initialData }: { initialData?: any }) {
                     <div className="mb-6">
                         <MediaUploader 
                             multiple={true}
-                            compressMedia={compressMedia}
+                            compressOptions={{ compress: compressImageEnabled, convertToWebp: convertToWebpEnabled }}
                             title="Add Media to Gallery"
                             description="Drag & drop files or provide direct links"
                             onUploadComplete={(res) => setFormData(prev => ({ ...prev, media: [...prev.media, ...res] }))}
@@ -374,12 +486,7 @@ export default function ProjectForm({ initialData }: { initialData?: any }) {
                                         <button
                                             type="button"
                                             title="Remove Media"
-                                            onClick={() => {
-                                                setFormData(prev => ({
-                                                    ...prev,
-                                                    media: prev.media.filter((_, i) => i !== index)
-                                                }));
-                                            }}
+                                            onClick={() => handleDeleteMedia(item.url, 'gallery', index)}
                                             className="p-3 bg-red-500 hover:bg-red-600 text-white rounded-full transition-colors transform hover:scale-110 shadow-lg"
                                         >
                                             <X size={18} />
@@ -471,6 +578,69 @@ export default function ProjectForm({ initialData }: { initialData?: any }) {
                         </div>
                     </div>
                 )}
+
+                {/* External Links Section */}
+                <div className="pt-6 border-t border-outline/10">
+                    <div className="flex items-center justify-between mb-4">
+                        <label className="block text-sm font-medium text-on-surface">External Links (Social, etc.)</label>
+                        <button 
+                            type="button" 
+                            onClick={() => setFormData(p => ({ ...p, externalLinks: [...p.externalLinks, { platform: "", url: "" }] }))}
+                            className="px-4 py-2 text-xs font-bold bg-primary/10 text-primary rounded-lg hover:bg-primary/20 transition-colors"
+                        >
+                            + Add Link
+                        </button>
+                    </div>
+                    <div className="space-y-3">
+                        {formData.externalLinks.map((link, idx) => (
+                            <div key={idx} className="flex flex-col sm:flex-row items-center gap-3 bg-surface-variant/5 p-3 rounded-xl border border-outline/10">
+                                <select
+                                    value={link.platform}
+                                    onChange={(e) => {
+                                        const newLinks = [...formData.externalLinks];
+                                        newLinks[idx].platform = e.target.value;
+                                        setFormData(p => ({ ...p, externalLinks: newLinks }));
+                                    }}
+                                    className="w-full sm:w-1/3 px-3 py-2 rounded-xl bg-surface-variant/30 border border-outline/20 focus:border-primary outline-none transition-colors text-sm"
+                                >
+                                    <option value="">Select Platform...</option>
+                                    <option value="Instagram">Instagram</option>
+                                    <option value="Behance">Behance</option>
+                                    <option value="Dribbble">Dribbble</option>
+                                    <option value="Pinterest">Pinterest</option>
+                                    <option value="Facebook">Facebook</option>
+                                    <option value="YouTube">YouTube</option>
+                                    <option value="LinkedIn">LinkedIn</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                                <input
+                                    type="url"
+                                    placeholder="https://"
+                                    value={link.url}
+                                    onChange={(e) => {
+                                        const newLinks = [...formData.externalLinks];
+                                        newLinks[idx].url = e.target.value;
+                                        setFormData(p => ({ ...p, externalLinks: newLinks }));
+                                    }}
+                                    className="w-full sm:flex-1 px-3 py-2 rounded-xl bg-surface-variant/30 border border-outline/20 focus:border-primary outline-none transition-colors text-sm"
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        const newLinks = formData.externalLinks.filter((_, i) => i !== idx);
+                                        setFormData(p => ({ ...p, externalLinks: newLinks }));
+                                    }}
+                                    className="p-2.5 text-red-500 hover:bg-red-500/10 rounded-xl transition-colors sm:self-auto self-end"
+                                >
+                                    <X size={18} />
+                                </button>
+                            </div>
+                        ))}
+                        {formData.externalLinks.length === 0 && (
+                            <p className="text-sm text-on-surface-variant/60 italic border border-dashed border-outline/20 p-6 rounded-xl text-center">No external links added to this project.</p>
+                        )}
+                    </div>
+                </div>
             </div>
 
             <button

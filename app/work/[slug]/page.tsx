@@ -2,9 +2,11 @@
 import { notFound } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
-import { ExternalLink, Github, ArrowLeft, Calendar } from "lucide-react";
+import { ExternalLink, Github, ArrowLeft, Calendar, Link as LinkIcon } from "lucide-react";
 import connectDB from "@/lib/mongodb";
 import { Project } from "@/models/Project";
+import LikeShareButtons from "@/components/LikeShareButtons";
+import FullscreenGallery from "@/components/FullscreenGallery";
 
 interface PageProps {
     params: Promise<{ slug: string }>;
@@ -117,35 +119,42 @@ export default async function ProjectDetailPage({ params }: PageProps) {
                     </p>
 
                     {/* Action Buttons */}
-                    <div className="flex flex-wrap gap-4 mt-8">
-                        {project.liveUrl && (
-                            <a
-                                href={project.liveUrl}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="px-8 py-4 rounded-full bg-primary text-on-primary font-bold shadow-lg hover:shadow-xl hover:bg-primary/90 transition-all flex items-center gap-2"
-                            >
-                                <ExternalLink size={20} />
-                                View Live Site
-                            </a>
-                        )}
-                        {project.repoUrl && (
-                            <a
-                                href={project.repoUrl}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="px-8 py-4 rounded-full bg-surface border-2 border-outline text-on-surface font-medium hover:border-primary transition-all flex items-center gap-2"
-                            >
-                                <Github size={20} />
-                                View Repository
-                            </a>
-                        )}
+                    <div className="flex flex-col gap-6 mt-8">
+                        <div className="flex flex-wrap gap-4">
+                            {project.liveUrl && (
+                                <a
+                                    href={project.liveUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="px-8 py-4 rounded-full bg-primary text-on-primary font-bold shadow-lg hover:shadow-xl hover:bg-primary/90 transition-all flex items-center gap-2"
+                                >
+                                    <ExternalLink size={20} />
+                                    View Live Site
+                                </a>
+                            )}
+                            {project.repoUrl && (
+                                <a
+                                    href={project.repoUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="px-8 py-4 rounded-full bg-surface border-2 border-outline text-on-surface font-medium hover:border-primary transition-all flex items-center gap-2"
+                                >
+                                    <Github size={20} />
+                                    View Repository
+                                </a>
+                            )}
+                        </div>
+
+                        {/* Likes and Shares */}
+                        <div className="pt-2">
+                            <LikeShareButtons projectId={project._id.toString()} initialLikes={project.likes || 0} />
+                        </div>
                     </div>
                 </div>
 
-                {/* Tech Stack / Tools */}
-                <div className="grid md:grid-cols-2 gap-8 mb-16">
-                    {project.category === "web-development" && project.techStack.length > 0 && (
+                {/* Tech Stack / Tools / Links */}
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
+                    {project.category === "web-development" && project.techStack?.length > 0 && (
                         <div className="p-8 bg-surface rounded-3xl border border-outline/10">
                             <h3 className="text-2xl font-bold font-display mb-6">Tech Stack</h3>
                             <div className="flex flex-wrap gap-3">
@@ -176,36 +185,33 @@ export default async function ProjectDetailPage({ params }: PageProps) {
                             </div>
                         </div>
                     )}
+
+                    {project.externalLinks && project.externalLinks.length > 0 && (
+                        <div className="p-8 bg-surface rounded-3xl border border-outline/10">
+                            <h3 className="text-2xl font-bold font-display mb-6">Links & Socials</h3>
+                            <div className="flex items-center flex-wrap gap-4">
+                                {project.externalLinks.map((link: { platform: string, url: string }, i: number) => (
+                                    <a
+                                        key={i}
+                                        href={link.url}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="flex items-center gap-2 px-4 py-3 bg-surface-variant/20 hover:bg-surface-variant/40 hover:text-primary transition-colors text-on-surface font-medium border border-outline/10 rounded-xl"
+                                    >
+                                        <LinkIcon size={16} />
+                                        {link.platform}
+                                    </a>
+                                ))}
+                            </div>
+                        </div>
+                    )}
                 </div>
 
                 {/* Media Gallery */}
                 {project.media && project.media.length > 0 && (
                     <div className="mb-16 animate-slide-in-up" style={{ animationDelay: '0.2s' }}>
                         <h3 className="text-3xl font-bold font-display mb-8">Project Gallery</h3>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            {project.media.map((item: { type: string, url: string }, index: number) => (
-                                <div
-                                    key={index}
-                                    className="relative aspect-video rounded-3xl overflow-hidden bg-surface-variant/20 border border-outline/10 group shadow-lg"
-                                >
-                                    {item.type === 'video' ? (
-                                        <video
-                                            src={item.url}
-                                            controls
-                                            playsInline
-                                            className="w-full h-full object-cover"
-                                        />
-                                    ) : (
-                                        <Image
-                                            src={item.url}
-                                            alt={`${project.title} - Gallery item ${index + 1}`}
-                                            fill
-                                            className="object-cover group-hover:scale-105 transition-transform duration-700"
-                                        />
-                                    )}
-                                </div>
-                            ))}
-                        </div>
+                        <FullscreenGallery media={project.media} projectTitle={project.title} />
                     </div>
                 )}
 

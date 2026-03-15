@@ -46,11 +46,32 @@ export async function DELETE(
         const { id } = await params;
 
         await connectDB();
-        const project = await Project.findByIdAndDelete(id);
-
+        
+        // Find the project first to get media URLs
+        const project = await Project.findById(id);
         if (!project) {
             return NextResponse.json({ error: "Project not found" }, { status: 404 });
         }
+
+        // Delete from Cloudinary
+        const { extractPublicId, deleteFromCloudinary } = await import("@/lib/cloudinary");
+        const urlsToDelete = [];
+        if (project.coverImage) urlsToDelete.push(project.coverImage);
+        if (project.media && Array.isArray(project.media)) {
+            project.media.forEach((m: any) => {
+                if (m.url) urlsToDelete.push(m.url);
+            });
+        }
+
+        for (const url of urlsToDelete) {
+            const publicId = extractPublicId(url);
+            if (publicId) {
+                await deleteFromCloudinary(publicId).catch(err => console.error("Failed to delete Cloudinary asset:", err));
+            }
+        }
+
+        // Delete from MongoDB
+        await Project.findByIdAndDelete(id);
 
         return NextResponse.json({ message: "Project deleted successfully" });
     } catch (error) {

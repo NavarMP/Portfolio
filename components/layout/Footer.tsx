@@ -3,7 +3,6 @@
 import Link from "next/link";
 import {
     SiBehance,
-    SiLinkedin,
     SiGithub,
     SiTelegram,
     SiWhatsapp,
@@ -12,11 +11,12 @@ import {
     SiX,
     SiYoutube,
 } from "react-icons/si";
+import { FaLinkedin } from "react-icons/fa";
 import { HiMail, HiPhone } from "react-icons/hi";
 
 const socialLinks = [
     { name: "Behance", url: "https://www.behance.net/NavarMP", icon: SiBehance },
-    { name: "LinkedIn", url: "https://linkedin.com/in/NavarMP", icon: SiLinkedin },
+    { name: "LinkedIn", url: "https://linkedin.com/in/NavarMP", icon: FaLinkedin },
     { name: "Github", url: "https://github.com/NavarMP", icon: SiGithub },
     { name: "Telegram", url: "https://t.me/NavarMP", icon: SiTelegram },
     {

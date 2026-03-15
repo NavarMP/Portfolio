@@ -69,6 +69,11 @@ export default async function AdminProjectsPage() {
                                             Featured
                                         </span>
                                     )}
+                                    {project.isArchived && (
+                                        <span className="px-3 py-1 bg-red-500/10 text-red-500 text-xs font-bold rounded-full">
+                                            Archived
+                                        </span>
+                                    )}
                                     <span className="px-3 py-1 bg-surface-variant text-on-surface-variant text-xs font-medium rounded-full">
                                         {project.category}
                                     </span>

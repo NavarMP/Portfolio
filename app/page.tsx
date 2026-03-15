@@ -13,9 +13,9 @@ import {
 } from "lucide-react";
 import {
     SiGithub,
-    SiLinkedin,
     SiBehance
 } from "react-icons/si";
+import { FaLinkedin } from "react-icons/fa";
 import { cn } from "@/lib/utils";
 import { Logo } from "@/components/ui/Logo";
 import { Availability } from "@/components/providers/Availability";
@@ -128,7 +128,7 @@ export default function Home() {
                         {/* Social Proof / Tiny details */}
                         <div className="pt-4 flex items-center gap-6 text-on-surface-variant/60">
                             <a href="https://Github.com/NavarMP" className="hover:text-primary transition-colors"><SiGithub size={20} /></a>
-                            <a href="https://LinkedIn.com/in/NavarMP" className="hover:text-primary transition-colors"><SiLinkedin size={20} /></a>
+                            <a href="https://LinkedIn.com/in/NavarMP" className="hover:text-primary transition-colors"><FaLinkedin size={20} /></a>
                             <a href="https://Behance.net/NavarMP" className="hover:text-primary transition-colors"><SiBehance size={20} /></a>
                             <span className="h-1 w-1 rounded-full bg-current"></span>
 

@@ -1,20 +1,41 @@
 import imageCompression from 'browser-image-compression';
 
-export async function compressImage(file: File): Promise<File> {
-    const options = {
-        maxSizeMB: 1, // Target size up to 1MB
-        maxWidthOrHeight: 1920, // Reasonable max dimension for web content
+export async function compressImage(
+    file: File, 
+    options: { compress: boolean; convertToWebp: boolean } = { compress: true, convertToWebp: true }
+): Promise<File> {
+    if (!options.compress && !options.convertToWebp) {
+        return file;
+    }
+
+    const compressionOptions: any = {
+        maxSizeMB: 2, // Increased target size to retain more quality
+        maxWidthOrHeight: 1920,
+        initialQuality: 0.85, // Retain 85% starting quality
         useWebWorker: true,
-        fileType: 'image/webp' as any, // Convert to WebP format
     };
-    
+
+    if (options.convertToWebp) {
+        compressionOptions.fileType = 'image/webp' as any;
+    }
+
     try {
-        const compressedBlob = await imageCompression(file, options);
-        return new File([compressedBlob], file.name.replace(/\.[^/.]+$/, "") + ".webp", {
-            type: 'image/webp'
-        });
+        let compressedBlob: Blob = file;
+        
+        if (options.compress || options.convertToWebp) {
+           compressedBlob = await imageCompression(file, compressionOptions);
+        }
+        
+        const fileExtension = options.convertToWebp ? '.webp' : `.${file.name.split('.').pop()}`;
+        const targetType = options.convertToWebp ? 'image/webp' : file.type;
+
+        return new File(
+            [compressedBlob], 
+            file.name.replace(/\.[^/.]+$/, "") + fileExtension, 
+            { type: targetType }
+        );
     } catch (error) {
-        console.error("Error compressing image:", error);
+        console.error("Error processing image:", error);
         return file; // Return original if compression fails
     }
 }

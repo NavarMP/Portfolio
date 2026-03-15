@@ -63,6 +63,20 @@ const ProjectSchema = new Schema(
             type: Boolean,
             default: false,
         },
+        isArchived: {
+            type: Boolean,
+            default: false,
+        },
+        likes: {
+            type: Number,
+            default: 0,
+        },
+        externalLinks: [
+            {
+                platform: { type: String, trim: true }, // e.g., 'Instagram', 'Behance'
+                url: { type: String, trim: true },
+            }
+        ],
         order: {
             type: Number,
             default: 0, // For manual sorting

@@ -11,7 +11,7 @@ export async function GET(request: Request) {
         const subcategory = searchParams.get("subcategory");
         const featured = searchParams.get("featured");
 
-        const query: any = {};
+        const query: any = { isArchived: { $ne: true } };
         if (category && category !== "all") query.category = category;
         if (subcategory && subcategory !== "all") query.subcategory = subcategory;
         if (featured === "true") query.featured = true;

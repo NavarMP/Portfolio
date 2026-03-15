@@ -42,4 +42,44 @@ export async function uploadToCloudinary(file: File, folder = 'navarmp-portfolio
     });
 }
 
+/**
+ * Extracts the public_id from a Cloudinary URL
+ */
+export function extractPublicId(url: string): string | null {
+    try {
+        // e.g., https://res.cloudinary.com/cloud_name/image/upload/v123456789/folder/image.png
+        const parts = url.split('/');
+        const uploadIndex = parts.findIndex(p => p === 'upload'); // Find 'upload' segment
+        if (uploadIndex === -1) return null;
+        
+        // Skip version if present
+        let startIndex = uploadIndex + 1;
+        if (parts[startIndex].startsWith('v') && !isNaN(parseInt(parts[startIndex].substring(1)))) {
+            startIndex++;
+        }
+        
+        // public_id is everything after version, minus the file extension
+        const filepath = parts.slice(startIndex).join('/');
+        return filepath.split('.')[0];
+    } catch (e) {
+        return null;
+    }
+}
+
+/**
+ * Deletes a file from Cloudinary given its public_id
+ */
+export async function deleteFromCloudinary(publicId: string): Promise<boolean> {
+    return new Promise((resolve) => {
+        cloudinary.uploader.destroy(publicId, (error, result) => {
+            if (error) {
+                console.error('Cloudinary delete error:', error);
+                resolve(false);
+            } else {
+                resolve(result.result === 'ok');
+            }
+        });
+    });
+}
+
 export default cloudinary;

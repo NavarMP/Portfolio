@@ -31,3 +31,33 @@ export async function POST(req: Request) {
         return new NextResponse("Internal Error", { status: 500 });
     }
 }
+
+export async function DELETE(req: Request) {
+    try {
+        const session = await auth();
+        if (!session || session.user.role !== "admin") {
+            return new NextResponse("Unauthorized", { status: 401 });
+        }
+
+        const { url } = await req.json();
+        if (!url) {
+            return new NextResponse("No URL provided", { status: 400 });
+        }
+
+        // We need to import the new utilities from lib/cloudinary
+        const { extractPublicId, deleteFromCloudinary } = await import("@/lib/cloudinary");
+        const publicId = extractPublicId(url);
+        
+        if (publicId) {
+            const success = await deleteFromCloudinary(publicId);
+            if (success) {
+                return NextResponse.json({ message: "Deleted successfully" });
+            }
+        }
+
+        return new NextResponse("Failed to delete from Cloudinary", { status: 400 });
+    } catch (error) {
+        console.error("[UPLOAD_DELETE]", error);
+        return new NextResponse("Internal Error", { status: 500 });
+    }
+}
