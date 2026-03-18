@@ -9,6 +9,7 @@ import { BackgroundParticles } from "@/components/ui/background-particles";
 import { SettingsMenu } from "@/components/ui/SettingsMenu";
 import { SettingsButton } from "@/components/ui/SettingsButton";
 import { SmoothScrollProvider } from "@/components/providers/SmoothScrollProvider";
+import { SearchDialog } from "@/components/ui/SearchDialog";
 
 export const metadata: Metadata = {
     metadataBase: new URL("https://NavarMP.com"),
@@ -64,6 +65,7 @@ export default function RootLayout({
 
                         <Footer />
                         <SettingsMenu />
+                        <SearchDialog />
                     </SmoothScrollProvider>
                 </ThemeProvider>
             </body>

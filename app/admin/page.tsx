@@ -10,6 +10,7 @@ import {
     LogOut,
     Settings,
     BarChart3,
+    File
 } from "lucide-react";
 import connectDB from "@/lib/mongodb";
 import { Project } from "@/models/Project";
@@ -143,6 +144,19 @@ export default async function AdminDashboard() {
                                 View Inquiries
                             </h3>
                             <p className="text-on-surface-variant">Review and respond to contact form submissions</p>
+                        </Link>
+
+                        <Link
+                            href="/admin/resume"
+                            className="group p-8 bg-surface rounded-3xl border border-outline/10 hover:border-primary/50 transition-all hover:shadow-xl"
+                        >
+                            <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center text-primary mb-4 group-hover:bg-primary group-hover:text-on-primary transition-colors">
+                                <File size={28} />
+                            </div>
+                            <h3 className="text-xl font-bold font-display mb-2 group-hover:text-primary transition-colors">
+                                Edit Resume
+                            </h3>
+                            <p className="text-on-surface-variant">Manage your resume content</p>
                         </Link>
 
                         <Link

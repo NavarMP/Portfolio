@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";
-import { uploadToCloudinary } from "@/lib/cloudinary";
+import { uploadToLocal, deleteFromLocal } from "@/lib/localUpload";
 
 export async function POST(req: Request) {
     try {
@@ -17,15 +17,9 @@ export async function POST(req: Request) {
             return new NextResponse("No file provided", { status: 400 });
         }
 
-        // Validate file type (optional but recommended)
-        // const validTypes = ['image/jpeg', 'image/png', 'image/webp', 'application/pdf'];
-        // if (!validTypes.includes(file.type)) {
-        //     return new NextResponse("Invalid file type", { status: 400 });
-        // }
+        const result = await uploadToLocal(file, folder);
 
-        const url = await uploadToCloudinary(file, folder);
-
-        return NextResponse.json({ url });
+        return NextResponse.json({ url: result.url });
     } catch (error) {
         console.error("[UPLOAD_POST]", error);
         return new NextResponse("Internal Error", { status: 500 });
@@ -39,23 +33,17 @@ export async function DELETE(req: Request) {
             return new NextResponse("Unauthorized", { status: 401 });
         }
 
-        const { url } = await req.json();
+        const { url, folder } = await req.json();
         if (!url) {
             return new NextResponse("No URL provided", { status: 400 });
         }
 
-        // We need to import the new utilities from lib/cloudinary
-        const { extractPublicId, deleteFromCloudinary } = await import("@/lib/cloudinary");
-        const publicId = extractPublicId(url);
-        
-        if (publicId) {
-            const success = await deleteFromCloudinary(publicId);
-            if (success) {
-                return NextResponse.json({ message: "Deleted successfully" });
-            }
+        const folderName = folder || 'navarmp-portfolio';
+        const success = deleteFromLocal(url, folderName);
+        if (success) {
+            return NextResponse.json({ message: "Deleted successfully" });
         }
-
-        return new NextResponse("Failed to delete from Cloudinary", { status: 400 });
+        return new NextResponse("Failed to delete local file", { status: 400 });
     } catch (error) {
         console.error("[UPLOAD_DELETE]", error);
         return new NextResponse("Internal Error", { status: 500 });

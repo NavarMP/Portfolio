@@ -12,6 +12,7 @@ import {
     HiColorSwatch,
     HiUser,
     HiMail,
+    HiSearch,
 } from "react-icons/hi";
 
 gsap.registerPlugin(Draggable);
@@ -173,6 +174,12 @@ export function FloatingNav() {
 
     const isVertical = position === "left" || position === "right";
 
+    const handleSearchClick = () => {
+        if (typeof window !== "undefined" && (window as any).openSearch) {
+            (window as any).openSearch();
+        }
+    };
+
     return (
         <nav
             ref={navRef}
@@ -201,6 +208,22 @@ export function FloatingNav() {
                     </Link>
                 );
             })}
+
+            {/* Separator */}
+            {isVertical && <div className="w-full h-px bg-outline/20" />}
+
+            {/* Search Button */}
+            <button
+                onClick={handleSearchClick}
+                data-clickable="true"
+                className="p-3 rounded-lg transition-all hover:scale-110 group relative text-on-surface hover:bg-surface-variant"
+                title="Search"
+            >
+                <HiSearch className="w-5 h-5" />
+                <span className="absolute hidden group-hover:block bg-surface-variant text-on-surface text-xs px-2 py-1 rounded whitespace-nowrap z-10 left-full ml-2 top-1/2 -translate-y-1/2">
+                    Search (Ctrl+K)
+                </span>
+            </button>
 
             {/* Drag Hint */}
             {/* <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 text-xs text-on-surface-variant opacity-50 whitespace-nowrap pointer-events-none">

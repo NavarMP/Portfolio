@@ -3,6 +3,7 @@
 import { useState, useCallback, useEffect } from "react";
 import Image from "next/image";
 import { X, ChevronLeft, ChevronRight, Maximize2 } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface MediaItem {
     type: string;
@@ -14,9 +15,68 @@ interface FullscreenGalleryProps {
     projectTitle: string;
 }
 
+type AspectRatio = 'portrait' | 'square' | 'landscape';
+
+interface MediaWithRatio extends MediaItem {
+    aspectRatio?: AspectRatio;
+    naturalWidth?: number;
+    naturalHeight?: number;
+}
+
+const getAspectRatio = (width: number, height: number): AspectRatio => {
+    const ratio = width / height;
+    if (ratio < 0.9) return 'portrait';
+    if (ratio > 1.1) return 'landscape';
+    return 'square';
+};
+
+const getHeightClass = (aspectRatio?: AspectRatio): string => {
+    switch (aspectRatio) {
+        case 'portrait': return 'h-96';
+        case 'square': return 'h-72';
+        case 'landscape': return 'h-56';
+        default: return 'h-72';
+    }
+};
+
 export default function FullscreenGallery({ media, projectTitle }: FullscreenGalleryProps) {
     const [isOpen, setIsOpen] = useState(false);
     const [currentIndex, setCurrentIndex] = useState(0);
+    const [mediaWithRatios, setMediaWithRatios] = useState<MediaWithRatio[]>(media);
+
+    useEffect(() => {
+        setMediaWithRatios(media);
+    }, [media]);
+
+    const handleImageLoad = useCallback((index: number, e: React.SyntheticEvent<HTMLImageElement>) => {
+        const img = e.target as HTMLImageElement;
+        setMediaWithRatios(prev => {
+            const updated = [...prev];
+            updated[index] = {
+                ...updated[index],
+                naturalWidth: img.naturalWidth,
+                naturalHeight: img.naturalHeight,
+                aspectRatio: getAspectRatio(img.naturalWidth, img.naturalHeight)
+            };
+            return updated;
+        });
+    }, []);
+
+    const handleVideoLoad = useCallback((index: number, e: React.SyntheticEvent<HTMLVideoElement>) => {
+        const video = e.target as HTMLVideoElement;
+        if (video.videoWidth && video.videoHeight) {
+            setMediaWithRatios(prev => {
+                const updated = [...prev];
+                updated[index] = {
+                    ...updated[index],
+                    naturalWidth: video.videoWidth,
+                    naturalHeight: video.videoHeight,
+                    aspectRatio: getAspectRatio(video.videoWidth, video.videoHeight)
+                };
+                return updated;
+            });
+        }
+    }, []);
 
     const openGallery = (index: number) => {
         setCurrentIndex(index);
@@ -56,30 +116,36 @@ export default function FullscreenGallery({ media, projectTitle }: FullscreenGal
 
     return (
         <div>
-            {/* Gallery Grid View */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {media.map((item, index) => (
+            {/* Masonry Grid View */}
+            <div className="columns-1 md:columns-2 lg:columns-3 gap-6 space-y-6">
+                {mediaWithRatios.map((item, index) => (
                     <div
                         key={index}
                         onClick={() => openGallery(index)}
-                        className="relative aspect-video rounded-3xl overflow-hidden bg-surface-variant/20 border border-outline/10 group shadow-lg cursor-pointer"
+                        className="break-inside-avoid relative rounded-3xl overflow-hidden bg-surface-variant/20 border border-outline/10 group shadow-lg cursor-pointer animate-slide-in-up"
+                        style={{ animationDelay: `${index * 0.05}s` }}
                     >
-                        {item.type === 'video' ? (
-                            <video
-                                src={item.url}
-                                className="w-full h-full object-cover"
-                            />
-                        ) : (
-                            <Image
-                                src={item.url}
-                                alt={`${projectTitle} - Gallery item ${index + 1}`}
-                                fill
-                                className="object-cover group-hover:scale-105 transition-transform duration-700 pointer-events-none"
-                            />
-                        )}
-                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                            <div className="p-4 bg-white/20 backdrop-blur-md rounded-full text-white transform translate-y-4 group-hover:translate-y-0 transition-all duration-300">
-                                <Maximize2 size={24} />
+                        <div className={cn("relative w-full overflow-hidden", getHeightClass(item.aspectRatio))}>
+                            {item.type === 'video' ? (
+                                <video
+                                    src={item.url}
+                                    className="w-full h-full object-cover"
+                                    onLoadedMetadata={(e) => handleVideoLoad(index, e)}
+                                />
+                            ) : (
+                                <Image
+                                    src={item.url}
+                                    alt={`${projectTitle} - Gallery item ${index + 1}`}
+                                    fill
+                                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                                    className="object-cover group-hover:scale-105 transition-transform duration-700 pointer-events-none"
+                                    onLoad={(e) => handleImageLoad(index, e)}
+                                />
+                            )}
+                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                                <div className="p-4 bg-white/20 backdrop-blur-md rounded-full text-white transform translate-y-4 group-hover:translate-y-0 transition-all duration-300">
+                                    <Maximize2 size={24} />
+                                </div>
                             </div>
                         </div>
                     </div>

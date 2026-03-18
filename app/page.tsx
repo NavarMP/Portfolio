@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import {
     ArrowRight,
-    Download,
+    File,
     Send,
     Palette,
     Code,
@@ -121,7 +121,7 @@ export default function Home() {
                                 href="/resume"
                                 className="px-6 py-4 rounded-full flex items-center text-on-surface-variant hover:text-primary transition-colors"
                             >
-                                <Download className="mr-2 w-5 h-5" /> Resume
+                                <File className="mr-2 w-5 h-5" /> Resume
                             </a>
                         </div>
 

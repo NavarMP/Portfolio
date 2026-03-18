@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, DragEvent } from "react";
-import { UploadCloud, Link as LinkIcon, Loader2, Plus, Crop } from "lucide-react";
+import { UploadCloud, Link as LinkIcon, Loader2, Plus, Crop, HardDrive } from "lucide-react";
 import { compressImage } from "@/lib/compressImage";
 import ImageCropper from "./ImageCropper";
 
