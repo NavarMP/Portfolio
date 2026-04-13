@@ -53,9 +53,10 @@ export async function DELETE(
             return NextResponse.json({ error: "Project not found" }, { status: 404 });
         }
 
-        // Delete from Cloudinary
-        const { extractPublicId, deleteFromCloudinary } = await import("@/lib/cloudinary");
+        // Delete local files
+        const { deleteFromLocal } = await import("@/lib/localUpload");
         const urlsToDelete = [];
+        
         if (project.coverImage) urlsToDelete.push(project.coverImage);
         if (project.media && Array.isArray(project.media)) {
             project.media.forEach((m: any) => {
@@ -63,10 +64,15 @@ export async function DELETE(
             });
         }
 
+        // Extract folder and delete each file
         for (const url of urlsToDelete) {
-            const publicId = extractPublicId(url);
-            if (publicId) {
-                await deleteFromCloudinary(publicId).catch(err => console.error("Failed to delete Cloudinary asset:", err));
+            const parts = url.split('/');
+            if (parts.length >= 4) {
+                const folder = parts[3]; // Extract folder from /api/media/{folder}/filename
+                const success = deleteFromLocal(url, folder);
+                if (!success) {
+                    console.warn(`Failed to delete local file: ${url}`);
+                }
             }
         }
 

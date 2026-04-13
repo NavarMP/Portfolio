@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { Save, Loader2, X, Image as ImageIcon, Video, Link as LinkIcon, Info, ImagePlus } from "lucide-react";
 import MediaViewer from "./MediaViewer";
@@ -25,12 +25,40 @@ interface ProjectFormData {
     externalLinks: Array<{ platform: string, url: string }>;
 }
 
+type AspectRatio = 'portrait' | 'square' | 'landscape';
+
+interface MediaWithRatio {
+    url: string;
+    type: string;
+    aspectRatio?: AspectRatio;
+    naturalWidth?: number;
+    naturalHeight?: number;
+}
+
+const getAspectRatio = (width: number, height: number): AspectRatio => {
+    const ratio = width / height;
+    if (ratio < 0.9) return 'portrait';
+    if (ratio > 1.1) return 'landscape';
+    return 'square';
+};
+
+const getHeightClass = (aspectRatio?: AspectRatio): string => {
+    switch (aspectRatio) {
+        case 'portrait': return 'h-96';
+        case 'square': return 'h-72';
+        case 'landscape': return 'h-56';
+        default: return 'h-72';
+    }
+};
+
 export default function ProjectForm({ initialData }: { initialData?: any }) {
     const router = useRouter();
     const [loading, setLoading] = useState(false);
     const [compressImageEnabled, setCompressImageEnabled] = useState(true);
     const [convertToWebpEnabled, setConvertToWebpEnabled] = useState(true);
     const [isSlugManuallyEdited, setIsSlugManuallyEdited] = useState(!!initialData?.slug);
+    const [coverImageRatio, setCoverImageRatio] = useState<AspectRatio>();
+    const [mediaWithRatios, setMediaWithRatios] = useState<MediaWithRatio[]>([]);
 
     // Basic state for form fields
     const [formData, setFormData] = useState<ProjectFormData>({
@@ -141,6 +169,51 @@ export default function ProjectForm({ initialData }: { initialData?: any }) {
         }
     }, [formData, initialData]);
 
+    // Update mediaWithRatios when formData.media changes
+    useEffect(() => {
+        setMediaWithRatios(formData.media.map(item => ({
+            ...item,
+            aspectRatio: undefined,
+            naturalWidth: undefined,
+            naturalHeight: undefined
+        })));
+    }, [formData.media]);
+
+    const handleImageLoad = useCallback((index: number, e: React.SyntheticEvent<HTMLImageElement>) => {
+        const img = e.target as HTMLImageElement;
+        setMediaWithRatios(prev => {
+            const updated = [...prev];
+            updated[index] = {
+                ...updated[index],
+                naturalWidth: img.naturalWidth,
+                naturalHeight: img.naturalHeight,
+                aspectRatio: getAspectRatio(img.naturalWidth, img.naturalHeight)
+            };
+            return updated;
+        });
+    }, []);
+
+    const handleVideoLoad = useCallback((index: number, e: React.SyntheticEvent<HTMLVideoElement>) => {
+        const video = e.target as HTMLVideoElement;
+        if (video.videoWidth && video.videoHeight) {
+            setMediaWithRatios(prev => {
+                const updated = [...prev];
+                updated[index] = {
+                    ...updated[index],
+                    naturalWidth: video.videoWidth,
+                    naturalHeight: video.videoHeight,
+                    aspectRatio: getAspectRatio(video.videoWidth, video.videoHeight)
+                };
+                return updated;
+            });
+        }
+    }, []);
+
+    const handleCoverImageLoad = useCallback((e: React.SyntheticEvent<HTMLImageElement>) => {
+        const img = e.target as HTMLImageElement;
+        setCoverImageRatio(getAspectRatio(img.naturalWidth, img.naturalHeight));
+    }, []);
+
     const handleDeleteMedia = async (url: string, type: 'cover' | 'gallery', index?: number) => {
         if (!confirm("Are you sure you want to delete this media? This will permanently remove it from storage.")) return;
         
@@ -155,7 +228,7 @@ export default function ProjectForm({ initialData }: { initialData?: any }) {
                 }));
             }
 
-            // Fire delete to Cloudinary
+            // Delete file from local storage
             await fetch('/api/upload', {
                 method: 'DELETE',
                 headers: { 'Content-Type': 'application/json' },
@@ -341,18 +414,7 @@ export default function ProjectForm({ initialData }: { initialData?: any }) {
                             <span className="font-medium text-sm">Featured</span>
                         </label>
                     </div>
-                    <div className="flex items-center gap-4 mt-6 md:mt-8">
-                        <label className="flex items-center gap-3 cursor-pointer p-3 md:p-4 rounded-xl border border-outline/20 bg-surface-variant/10 hover:bg-surface-variant/30 transition-colors flex-1 w-full text-red-500 hover:bg-red-500/10">
-                            <input
-                                type="checkbox"
-                                name="isArchived"
-                                checked={formData.isArchived}
-                                onChange={handleChange}
-                                className="w-5 h-5 rounded text-red-500 focus:ring-red-500"
-                            />
-                            <span className="font-medium text-sm">Archived (Hide from public)</span>
-                        </label>
-                    </div>
+
                 </div>
             </div>
 
@@ -409,15 +471,14 @@ export default function ProjectForm({ initialData }: { initialData?: any }) {
                                 multiple={false}
                                 compressOptions={{ compress: compressImageEnabled, convertToWebp: convertToWebpEnabled }}
                                 title="Upload Cover Image"
-                                description="16:9 aspect ratio applied automatically"
-                                cropRatio={16 / 9}
+                                description="Actual ratio applied automatically"
                                 onUploadComplete={(res) => setFormData(prev => ({ ...prev, coverImage: res[0].url }))}
                             />
                         </div>
                         <div className="order-1 md:order-2">
                             {formData.coverImage ? (
-                                <div className="aspect-video w-full md:w-64 rounded-xl overflow-hidden border border-outline/20 relative shadow-md group">
-                                    <img src={formData.coverImage} alt="Cover Preview" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                                <div className={`${getHeightClass(coverImageRatio)} w-full md:w-64 rounded-xl overflow-hidden border border-outline/20 relative shadow-md group bg-surface-variant/20`}>
+                                    <img src={formData.coverImage} alt="Cover Preview" onLoad={handleCoverImageLoad} className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500" />
                                     <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                                         <button
                                             type="button"
@@ -430,7 +491,7 @@ export default function ProjectForm({ initialData }: { initialData?: any }) {
                                     </div>
                                 </div>
                             ) : (
-                                <div className="aspect-video w-full md:w-64 rounded-xl border border-dashed border-outline/20 bg-surface-variant/10 flex flex-col items-center justify-center text-on-surface-variant">
+                                <div className="h-72 w-full md:w-64 rounded-xl border border-dashed border-outline/20 bg-surface-variant/10 flex flex-col items-center justify-center text-on-surface-variant">
                                     <ImageIcon size={24} className="mb-2 opacity-50" />
                                     <span className="text-xs">No cover image</span>
                                 </div>
@@ -462,38 +523,60 @@ export default function ProjectForm({ initialData }: { initialData?: any }) {
                     
                     {formData.media.length > 0 && (
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-8">
-                            {formData.media.map((item: { type: string, url: string }, index: number) => (
-                                <div key={index} className="relative aspect-video bg-surface-variant/20 rounded-2xl overflow-hidden group border border-outline/10 shadow-sm flex flex-col items-center justify-center">
-                                    <MediaViewer type={item.type} url={item.url} className="w-full h-full object-cover" />
-                                    
-                                    {item.type === 'video' && (
-                                        <div className="absolute top-2 left-2 p-1.5 bg-black/50 backdrop-blur-md text-white rounded-lg pointer-events-none">
-                                            <Video size={14} />
-                                        </div>
-                                    )}
-                                    
-                                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3">
-                                        {item.type === 'image' && (
+                            {formData.media.map((item: { type: string, url: string }, index: number) => {
+                                const mediaItem = mediaWithRatios[index];
+                                const heightClass = getHeightClass(mediaItem?.aspectRatio);
+                                return (
+                                    <div key={index} className={`${heightClass} relative bg-surface-variant/20 rounded-2xl overflow-hidden group border border-outline/10 shadow-sm flex flex-col items-center justify-center`}>
+                                        {item.type === 'image' ? (
+                                            <img 
+                                                src={item.url} 
+                                                alt={`Gallery item ${index}`}
+                                                onLoad={(e) => handleImageLoad(index, e)}
+                                                className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500" 
+                                            />
+                                        ) : item.type === 'video' ? (
+                                            <video 
+                                                src={item.url} 
+                                                onLoadedMetadata={(e) => handleVideoLoad(index, e)}
+                                                className="w-full h-full object-contain"
+                                                muted
+                                            />
+                                        ) : (
+                                            <div className="w-full h-full flex items-center justify-center bg-surface-variant/30">
+                                                <span className="text-xs text-on-surface-variant">Document</span>
+                                            </div>
+                                        )}
+                                        
+                                        {item.type === 'video' && (
+                                            <div className="absolute top-2 left-2 p-1.5 bg-black/50 backdrop-blur-md text-white rounded-lg pointer-events-none">
+                                                <Video size={14} />
+                                            </div>
+                                        )}
+                                        
+                                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3">
+                                            {item.type === 'image' && (
+                                                <button
+                                                    type="button"
+                                                    title="Set as Cover"
+                                                    onClick={() => setFormData(prev => ({ ...prev, coverImage: item.url }))}
+                                                    className="p-3 bg-blue-500 hover:bg-blue-600 text-white rounded-full transition-colors transform hover:scale-110 shadow-lg"
+                                                >
+                                                    <ImagePlus size={18} />
+                                                </button>
+                                            )}
                                             <button
                                                 type="button"
-                                                title="Set as Cover"
-                                                onClick={() => setFormData(prev => ({ ...prev, coverImage: item.url }))}
-                                                className="p-3 bg-blue-500 hover:bg-blue-600 text-white rounded-full transition-colors transform hover:scale-110 shadow-lg"
+                                                title="Remove Media"
+                                                onClick={() => handleDeleteMedia(item.url, 'gallery', index)}
+                                                className="p-3 bg-red-500 hover:bg-red-600 text-white rounded-full transition-colors transform hover:scale-110 shadow-lg"
                                             >
-                                                <ImagePlus size={18} />
+                                                <X size={18} />
                                             </button>
-                                        )}
-                                        <button
-                                            type="button"
-                                            title="Remove Media"
-                                            onClick={() => handleDeleteMedia(item.url, 'gallery', index)}
-                                            className="p-3 bg-red-500 hover:bg-red-600 text-white rounded-full transition-colors transform hover:scale-110 shadow-lg"
-                                        >
-                                            <X size={18} />
-                                        </button>
+                                        </div>
                                     </div>
-                                </div>
-                            ))}
+                                );
+                            })}
                         </div>
                     )}
                 </div>

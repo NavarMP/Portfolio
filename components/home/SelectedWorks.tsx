@@ -67,7 +67,7 @@ export function SelectedWorks() {
                             src={project.coverImage}
                             alt={project.title}
                             fill
-                            className="object-cover group-hover:scale-110 transition-transform duration-500"
+                            className="object-contain group-hover:scale-105 transition-transform duration-500"
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-60 group-hover:opacity-40 transition-opacity" />
                     </div>

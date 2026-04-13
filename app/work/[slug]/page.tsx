@@ -79,16 +79,16 @@ export default async function ProjectDetailPage({ params }: PageProps) {
             </div>
 
             {/* Hero Section with Cover Image */}
-            <div className="relative h-[60vh] max-h-[600px] w-full overflow-hidden mb-16 bg-surface-variant/20">
+            {/* <div className="relative h-[60vh] max-h-[600px] w-full overflow-hidden mb-16 bg-surface-variant/20">
                 <Image
                     src={project.coverImage}
                     alt={project.title}
                     fill
-                    className="object-cover"
+                    className="object-contain"
                     priority
                 />
                 <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-background/50 via-background/20 to-transparent pointer-events-none"></div>
-            </div>
+            </div> */}
 
             {/* Content */}
             <div className="max-w-7xl mx-auto px-4 md:px-8">
@@ -231,7 +231,7 @@ export default async function ProjectDetailPage({ params }: PageProps) {
                                             src={related.coverImage}
                                             alt={related.title}
                                             fill
-                                            className="object-cover group-hover:scale-110 transition-transform duration-500"
+                                            className="object-contain group-hover:scale-105 transition-transform duration-500"
                                         />
                                     </div>
                                     <div className="p-6">

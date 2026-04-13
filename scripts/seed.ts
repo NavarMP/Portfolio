@@ -26,8 +26,8 @@ async function seed() {
         console.log("🗑️  Cleared existing data");
 
         // 1. Create Admin User
-        const hashedPassword = await bcrypt.hash("admin123", 12);
-        const adminEmail = process.env.ADMIN_EMAIL || "NavarMP@gmail.com";
+        const hashedPassword = await bcrypt.hash(process.env.ADMIN_PASSWORD!, 12);
+        const adminEmail = process.env.ADMIN_EMAIL || process.env.ADMIN_EMAIL;
         const admin = await User.create({
             name: "Muḥammed Navār",
             email: adminEmail,
@@ -147,7 +147,7 @@ async function seed() {
 
         console.log("\n✨ Seed data created successfully!\n");
         console.log("📋 Summary:");
-        console.log(`   - Admin: ${admin.email} / admin123`);
+        console.log(`   - Admin: ${process.env.ADMIN_EMAIL} / ${process.env.ADMIN_PASSWORD}`);
         console.log(`   - Projects: ${projects.length}`);
         console.log(`   - Testimonials: ${testimonials.length}`);
 

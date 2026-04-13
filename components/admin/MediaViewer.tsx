@@ -27,7 +27,7 @@ export default function MediaViewer({ type, url, className = "" }: MediaViewerPr
 
     if (type === 'video') {
         return (
-            <video src={url} className={`object-cover ${className}`} controls muted />
+            <video src={url} className={className} controls muted />
         );
     }
 
@@ -62,6 +62,6 @@ export default function MediaViewer({ type, url, className = "" }: MediaViewerPr
 
     // Default to image
     return (
-        <img src={url} alt="Media Preview" className={`object-cover ${className}`} />
+        <img src={url} alt="Media Preview" className={className} />
     );
 }

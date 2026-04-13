@@ -21,11 +21,7 @@ export default async function EditProjectPage({ params }: { params: Promise<{ id
         notFound();
     }
 
-    // Convert _id to string for serialization
-    const serializedProject = {
-        ...project,
-        _id: (project as any)._id.toString(),
-    };
+    const serializedProject = JSON.parse(JSON.stringify(project));
 
     return (
         <div className="min-h-screen bg-surface/50 pt-24 pb-24">

@@ -129,7 +129,7 @@ export default function FullscreenGallery({ media, projectTitle }: FullscreenGal
                             {item.type === 'video' ? (
                                 <video
                                     src={item.url}
-                                    className="w-full h-full object-cover"
+                                    className="w-full h-full object-contain"
                                     onLoadedMetadata={(e) => handleVideoLoad(index, e)}
                                 />
                             ) : (
@@ -138,7 +138,7 @@ export default function FullscreenGallery({ media, projectTitle }: FullscreenGal
                                     alt={`${projectTitle} - Gallery item ${index + 1}`}
                                     fill
                                     sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                                    className="object-cover group-hover:scale-105 transition-transform duration-700 pointer-events-none"
+                                    className="object-contain group-hover:scale-105 transition-transform duration-700 pointer-events-none"
                                     onLoad={(e) => handleImageLoad(index, e)}
                                 />
                             )}

@@ -33,7 +33,7 @@ const ProjectSchema = new Schema(
             default: false,
         },
         coverImage: {
-            type: String, // Cloudinary URL
+            type: String, // Local storage URL (e.g., /api/media/projects/...)
         },
         media: [
             {

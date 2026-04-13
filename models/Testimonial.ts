@@ -26,7 +26,7 @@ const TestimonialSchema = new Schema(
             default: 5,
         },
         avatar: {
-            type: String, // Cloudinary URL or placeholder
+            type: String, // Local storage URL or placeholder
         },
         projectRef: {
             type: Schema.Types.ObjectId,

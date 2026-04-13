@@ -54,7 +54,7 @@ const defaultResumeData = {
     skills: {
         design: ["Adobe Illustrator", "Adobe Photoshop", "Adobe InDesign", "Figma", "Canva"],
         development: ["Next.js", "React", "TypeScript", "Node.js", "MongoDB", "Tailwind CSS"],
-        tools: ["VS Code", "Git & GitHub", "Cloudinary", "Vercel", "GSAP"],
+        tools: ["VS Code", "Git & GitHub", "Vercel", "GSAP"],
     },
     achievements: [
         {

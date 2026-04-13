@@ -67,7 +67,26 @@ A modern, full-stack portfolio website built with Next.js 15, featuring dynamic 
    npx auth secret
    ```
 
-4. **Seed the database** (optional but recommended)
+4. **Setup file upload directory**
+   
+   File uploads are stored outside the project root for git safety and PM2 compatibility. Create the upload directory:
+   ```bash
+   mkdir -p /var/uploads/portfolio
+   chmod 755 /var/uploads/portfolio
+   ```
+
+   Optionally, configure a custom upload directory in `.env.local`:
+   ```env
+   # Optional: custom upload directory (default: /var/uploads/portfolio)
+   UPLOAD_DIR=/var/uploads/portfolio
+   
+   # Optional: maximum file size in MB (default: 50)
+   UPLOAD_MAX_SIZE_MB=50
+   ```
+
+   > **Note for PM2 deployments**: Ensure `UPLOAD_DIR` points to a persistent directory outside the project. This preserves uploads across process restarts and `git clean` operations.
+
+5. **Seed the database** (optional but recommended)
    ```bash
    npm run seed
    ```
@@ -78,12 +97,12 @@ A modern, full-stack portfolio website built with Next.js 15, featuring dynamic 
    - Sample testimonials
    - Sample blog posts
 
-5. **Run the development server**
+6. **Run the development server**
    ```bash
    npm run dev
    ```
 
-6. **Open your browser**
+7. **Open your browser**
    
    Navigate to [http://localhost:3000](http://localhost:3000)
 
@@ -174,6 +193,18 @@ To add a new theme:
 - Toggle "Available for Freelance" and "Open for Hire" at `/admin/settings`
 - Update status message displayed in header
 
+#### File Uploads
+- Files are uploaded via the admin CMS (projects, profile photos, resumes)
+- Uploaded files are stored in the directory specified by `UPLOAD_DIR` environment variable (default: `/var/uploads/portfolio`)
+- Files are served securely through `/api/media/[folder]/[filename]` with proper MIME type detection
+- Supported formats:
+  - **Images**: JPEG, PNG, WebP, GIF (max 50MB by default)
+  - **Videos**: MP4, WebM, OGG (max 50MB by default)
+  - **Documents**: PDF (max 50MB by default)
+- Original filenames are sanitized to prevent directory traversal attacks
+- For development: Ensure `/var/uploads/portfolio` exists and is writable
+- For production: Use a persistent volume or network storage mounted at `UPLOAD_DIR`
+
 ## 🚀 Deployment
 
 ### Vercel (Recommended)
@@ -198,6 +229,55 @@ Ensure your hosting platform:
 - Supports Node.js 18+
 - Can access your MongoDB instance
 - Has environment variables configured
+
+### PM2 Deployment
+
+For PM2-based deployments with persistent file uploads:
+
+1. **Install PM2 globally**
+   ```bash
+   npm install -g pm2
+   ```
+
+2. **Create PM2 ecosystem file** (`ecosystem.config.js`):
+   ```javascript
+   module.exports = {
+     apps: [{
+       name: 'portfolio',
+       script: 'npm',
+       args: 'start',
+       instances: 'max',
+       exec_mode: 'cluster',
+       env: {
+         NODE_ENV: 'production',
+         UPLOAD_DIR: '/var/uploads/portfolio',
+         UPLOAD_MAX_SIZE_MB: '50',
+       },
+       ignore_watch: ['/var/uploads'],
+     }],
+   };
+   ```
+
+3. **Ensure upload directory exists and is persistent**
+   ```bash
+   mkdir -p /var/uploads/portfolio
+   sudo chown -R $USER:$USER /var/uploads/portfolio
+   chmod 755 /var/uploads/portfolio
+   ```
+
+4. **Start the application**
+   ```bash
+   pm2 start ecosystem.config.js
+   pm2 save
+   pm2 startup
+   ```
+
+5. **Monitor uploads**
+   ```bash
+   pm2 monit
+   ```
+
+**Important**: The `UPLOAD_DIR` must be outside the project directory to persist across `git pull` operations and PM2 restarts. Do not store uploads in `public/` or `app/` directories.
 
 ## 📝 Scripts
 

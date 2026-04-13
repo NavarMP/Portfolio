@@ -29,6 +29,11 @@ yarn-error.log*
 .env*.local
 .env
 
+# File uploads
+# NOTE: Uploads are stored OUTSIDE the project root (UPLOAD_DIR=/var/uploads/portfolio)
+# This keeps them out of git and persists across deployments and PM2 restarts
+# Do NOT add uploads to this project directory
+
 # vercel
 .vercel
 

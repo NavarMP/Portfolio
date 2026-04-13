@@ -6,6 +6,7 @@ import { ArrowLeft, Plus, Pencil } from "lucide-react";
 import connectDB from "@/lib/mongodb";
 import { Project } from "@/models/Project";
 import DeleteButton from "@/components/admin/DeleteButton";
+import ArchiveButton from "@/components/admin/ArchiveButton";
 
 export default async function AdminProjectsPage() {
     const session = await auth();
@@ -51,12 +52,11 @@ export default async function AdminProjectsPage() {
                             className="flex flex-col md:flex-row items-center gap-6 p-6 bg-surface rounded-3xl border border-outline/10 hover:border-primary/30 transition-all group"
                         >
                             {/* Image */}
-                            <div className="relative w-full md:w-48 h-32 rounded-xl overflow-hidden bg-surface-variant/20 flex-shrink-0">
-                                <Image
+                            <div className="relative w-full md:w-48 rounded-xl overflow-hidden bg-surface-variant/20 flex-shrink-0">
+                                <img
                                     src={project.coverImage}
                                     alt={project.title}
-                                    fill
-                                    className="object-cover"
+                                    className="w-full h-auto object-contain"
                                 />
                             </div>
 
@@ -85,6 +85,10 @@ export default async function AdminProjectsPage() {
 
                             {/* Actions */}
                             <div className="flex items-center gap-3">
+                                <ArchiveButton
+                                    id={project._id.toString()}
+                                    isArchived={project.isArchived}
+                                />
                                 <Link
                                     href={`/admin/projects/${project._id.toString()}/edit`}
                                     className="p-3 rounded-xl bg-surface-variant/30 text-on-surface hover:bg-primary hover:text-on-primary transition-colors"
